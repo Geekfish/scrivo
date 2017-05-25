@@ -13236,7 +13236,7 @@ var _user$project$Scrivo$viewInitial = A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('start'),
+				_0: _elm_lang$html$Html_Attributes$class('start container-centered'),
 				_1: {ctor: '[]'}
 			},
 			{

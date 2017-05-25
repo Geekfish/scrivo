@@ -44,7 +44,7 @@ viewInitial : Html Msg
 viewInitial =
     div [ class "container-fluid vertical-center" ]
         [ div
-            [ class "start" ]
+            [ class "start container-centered" ]
             [ h1 [] [ text "Scrivo", sup [] [ text "beta" ] ]
             , p [] [ text "Collaborative gaming meets writing improvisation" ]
             , div

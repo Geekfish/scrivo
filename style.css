@@ -2,6 +2,7 @@ body, html {
     height: 100%;
     margin: 0;
     font-family: 'Open Sans', sans-serif;
+    padding-top: 25px;
 }
 
 h1, a {
@@ -42,6 +43,19 @@ p {
     background-size: cover;
 }
 
+.navbar-brand {
+  transform: translateX(-50%);
+  left: 50%;
+  position: absolute;
+}
+
+.navbar-default {
+}
+
+.navbar-default .navbar-brand {
+    color: #8c4646;
+}
+
 .vertical-center {
     min-height: 100vh; /* These two lines are counted as one :-)       */
 
@@ -49,10 +63,13 @@ p {
     align-items: center;
 }
 
-.start {
-    text-align: center;
+.container-centered {
     max-width: 800px;
     margin: auto;
+}
+
+.start{
+    text-align: center;
 }
 
 .start .row {
