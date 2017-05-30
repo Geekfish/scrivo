@@ -13223,6 +13223,14 @@ var _elm_lang$navigation$Navigation$onEffects = F4(
 	});
 _elm_lang$core$Native_Platform.effectManagers['Navigation'] = {pkg: 'elm-lang/navigation', init: _elm_lang$navigation$Navigation$init, onEffects: _elm_lang$navigation$Navigation$onEffects, onSelfMsg: _elm_lang$navigation$Navigation$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$navigation$Navigation$cmdMap, subMap: _elm_lang$navigation$Navigation$subMap};
 
+var _user$project$Scrivo$viewGameLobby = A2(
+	_elm_lang$html$Html$div,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('container-fluid vertical-center'),
+		_1: {ctor: '[]'}
+	},
+	{ctor: '[]'});
 var _user$project$Scrivo$viewInitial = A2(
 	_elm_lang$html$Html$div,
 	{
@@ -13236,7 +13244,7 @@ var _user$project$Scrivo$viewInitial = A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('start container-centered'),
+				_0: _elm_lang$html$Html_Attributes$class('start col-md-6 col-md-offset-3'),
 				_1: {ctor: '[]'}
 			},
 			{
@@ -13358,25 +13366,7 @@ var _user$project$Scrivo$view = function (model) {
 	var _p0 = model.gameState;
 	switch (_p0.ctor) {
 		case 'CreatingGame':
-			return A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('container-fluid vertical-center'),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$h1,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('New Game'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {ctor: '[]'}
-				});
+			return _user$project$Scrivo$viewGameLobby;
 		case 'JoiningGame':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -13403,7 +13393,7 @@ var _user$project$Scrivo$view = function (model) {
 };
 var _user$project$Scrivo$Model = F6(
 	function (a, b, c, d, e, f) {
-		return {name: a, gameNumber: b, alertMessage: c, nameInput: d, gameState: e, history: f};
+		return {name: a, gameCode: b, alertMessage: c, nameInput: d, gameState: e, history: f};
 	});
 var _user$project$Scrivo$Playing = {ctor: 'Playing'};
 var _user$project$Scrivo$JoiningGame = {ctor: 'JoiningGame'};
@@ -13411,7 +13401,7 @@ var _user$project$Scrivo$CreatingGame = {ctor: 'CreatingGame'};
 var _user$project$Scrivo$Intro = {ctor: 'Intro'};
 var _user$project$Scrivo$initialModel = {
 	name: 'Anonymous',
-	gameNumber: 1,
+	gameCode: 'BJKQP',
 	alertMessage: _elm_lang$core$Maybe$Nothing,
 	nameInput: '',
 	history: {ctor: '[]'},

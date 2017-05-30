@@ -16,7 +16,7 @@ type GameState
 
 type alias Model =
     { name : String
-    , gameNumber : Int
+    , gameCode : String
     , alertMessage : Maybe String
     , nameInput : String
     , gameState : GameState
@@ -32,7 +32,7 @@ type Msg
 initialModel : Model
 initialModel =
     { name = "Anonymous"
-    , gameNumber = 1
+    , gameCode = "BJKQP"
     , alertMessage = Nothing
     , nameInput = ""
     , history = []
@@ -44,7 +44,7 @@ viewInitial : Html Msg
 viewInitial =
     div [ class "container-fluid vertical-center" ]
         [ div
-            [ class "start container-centered" ]
+            [ class "start col-md-6 col-md-offset-3" ]
             [ h1 [] [ text "Scrivo", sup [] [ text "beta" ] ]
             , p [] [ text "Collaborative gaming meets writing improvisation" ]
             , div
@@ -72,12 +72,16 @@ viewInitial =
         ]
 
 
+viewGameLobby : Html Msg
+viewGameLobby =
+    div [ class "container-fluid vertical-center" ] []
+
+
 view : Model -> Html Msg
 view model =
     case model.gameState of
         CreatingGame ->
-            div [ class "container-fluid vertical-center" ]
-                [ h1 [] [ text "New Game" ] ]
+            viewGameLobby
 
         JoiningGame ->
             div [ class "container-fluid vertical-center" ]

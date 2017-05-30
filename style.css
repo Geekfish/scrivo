@@ -2,7 +2,6 @@ body, html {
     height: 100%;
     margin: 0;
     font-family: 'Open Sans', sans-serif;
-    padding-top: 25px;
 }
 
 h1, a {
@@ -57,15 +56,15 @@ p {
 }
 
 .vertical-center {
-    min-height: 100vh; /* These two lines are counted as one :-)       */
+    min-height: 80vh; /* These two lines are counted as one :-)       */
 
     display: flex;
     align-items: center;
 }
 
-.container-centered {
-    max-width: 800px;
-    margin: auto;
+.main-content {
+    padding-top: 100px;
+    color: #fafafa;
 }
 
 .start{
@@ -74,4 +73,31 @@ p {
 
 .start .row {
     margin-top: 80px;
+}
+
+.game-code {
+
+}
+
+.players-list {
+    list-style-type: none;
+    font-size: 1.3em;
+    letter-spacing: 2px;
+    padding-left: 4px;
+}
+
+.players-list li {
+    padding-bottom: 10px;
+}
+
+.glyphicon-ok {
+    color: #0fbe3f;
+}
+
+.glyphicon-time {
+    color: #d4c329;
+}
+
+#nickname {
+    max-width: 200px;
 }
