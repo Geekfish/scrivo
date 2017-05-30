@@ -118,6 +118,10 @@ p {
     margin-bottom: 20px;
 }
 
+.players-list .nickname {
+    padding-left: 6px;
+}
+
 .players-list li {
     padding-bottom: 10px;
     padding-left: 10px;
