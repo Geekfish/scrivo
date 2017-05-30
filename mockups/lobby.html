@@ -28,20 +28,23 @@
               </div><!-- /.container-fluid -->
             </nav>
             <div class="container-fluid main-content">
-                <div class="row container-centered">
+                <div class="row flex-row">
                     <div class="col-md-3 col-md-offset-3">
                         <h2>Game Code</h2>
-                        <div class="game-code">BJKWPTQ</div>
-                        <form>
-                            <div class="form-group">
-                                <label for="nickname"><h2>Nickname</h2></label>
-                                <input type="text" class="form-control" maxlength="12" id="nickname" name="nickname" placeholder="Your name" />
-                            </div>
-                        </form>
+                        <div class="game-code round-colored-container">BJKWPTQ</div>
+                        <div>
+                        <h2>Profile</h2>
+                            <form class="form round-container">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" maxlength="12" id="nickname" name="nickname" placeholder="Your name" />
+                                    <button class="btn btn-lg btn-success btn-group-justified">Ready ?</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <h2>Players Joined</h2>
-                        <ul class="players-list">
+                        <ul class="players-list round-colored-container">
                             <li>
                                 <span class="glyphicon glyphicon-ok" aria-hidden="true" title="Ready!"></span>
                                 <span class="nickname">Alpaca15234</span>

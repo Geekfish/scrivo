@@ -23,6 +23,25 @@ p {
     font-size: 1.5em;
 }
 
+.btn.btn-group-justified {
+    margin-top: 8px;
+}
+
+@media only screen and (min-width : 481px) {
+    .flex-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .flex-row > [class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+    .flex-row.row:after,
+    .flex-row.row:before {
+        display: flex;
+    }
+}
+
 .bg {
     /* The image used */
 
@@ -56,8 +75,7 @@ p {
 }
 
 .vertical-center {
-    min-height: 80vh; /* These two lines are counted as one :-)       */
-
+    min-height: 80vh;
     display: flex;
     align-items: center;
 }
@@ -75,8 +93,20 @@ p {
     margin-top: 80px;
 }
 
-.game-code {
+.round-container {
+    padding: 8px;
+}
 
+.round-colored-container {
+    background-color: rgba(255, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.game-code {
+    font-family: monospace;
+    font-size: 1.4em;
+    letter-spacing: 3px;
 }
 
 .players-list {
@@ -84,10 +114,13 @@ p {
     font-size: 1.3em;
     letter-spacing: 2px;
     padding-left: 4px;
+    height: 100%;
+    margin-bottom: 20px;
 }
 
 .players-list li {
     padding-bottom: 10px;
+    padding-left: 10px;
 }
 
 .glyphicon-ok {
@@ -96,8 +129,4 @@ p {
 
 .glyphicon-time {
     color: #d4c329;
-}
-
-#nickname {
-    max-width: 200px;
 }
