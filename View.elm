@@ -151,8 +151,33 @@ playerStatus player =
 join : Html Msg
 join =
     div
-        [ class "container-fluid vertical-center" ]
-        [ h1 [] [ text "Join Game" ] ]
+        [ class "container-fluid main-content" ]
+        [ div
+            [ class "row flex-row" ]
+            [ div
+                [ class "col-md-2 col-md-offset-5" ]
+                [ h2 [ class "text-center" ] [ text "Join a game" ]
+                , form
+                    [ class "form round-container" ]
+                    [ div
+                        [ class "form-group" ]
+                        [ input
+                            [ type_ "text"
+                            , class "form-control input-lg"
+                            , maxlength 12
+                            , id "game-code"
+                            , name "game-code"
+                            , placeholder "ex. GKLPX"
+                            ]
+                            []
+                        , button
+                            [ class "btn btn-lg btn-success btn-group-justified" ]
+                            [ text "Join" ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
 
 
 withNavigation : Html Msg -> Html Msg
