@@ -17,14 +17,14 @@ import Html.Attributes
 import Types
     exposing
         ( Msg
-        , CurrentView(CreatingGame, JoiningGame)
+        , CurrentView(InLobby, JoiningGame)
         , Player
         , Model
         )
 
 
-viewInitial : Html Msg
-viewInitial =
+initial : Html Msg
+initial =
     div [ class "container-fluid vertical-center" ]
         [ div
             [ class "start col-md-6 col-md-offset-3" ]
@@ -55,8 +55,8 @@ viewInitial =
         ]
 
 
-viewNavigation : Html Msg
-viewNavigation =
+navigation : Html Msg
+navigation =
     nav
         [ class "navbar navbar-default navbar-fixed-top" ]
         [ div
@@ -73,8 +73,8 @@ viewNavigation =
         ]
 
 
-viewGameLobby : Html Msg
-viewGameLobby =
+lobby : Html Msg
+lobby =
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -148,24 +148,27 @@ playerStatus player =
             ]
 
 
-appView : Html Msg -> Html Msg
-appView msg =
-    -- Add navigation to main app views
-    div [] [ viewNavigation, msg ]
+join : Html Msg
+join =
+    div
+        [ class "container-fluid vertical-center" ]
+        [ h1 [] [ text "Join Game" ] ]
+
+
+withNavigation : Html Msg -> Html Msg
+withNavigation msg =
+    -- Adds navigation to main app views
+    div [] [ navigation, msg ]
 
 
 view : Model -> Html Msg
 view model =
     case model.currentView of
-        CreatingGame ->
-            appView viewGameLobby
+        InLobby ->
+            withNavigation lobby
 
         JoiningGame ->
-            appView
-                (div
-                    [ class "container-fluid vertical-center" ]
-                    [ h1 [] [ text "Join Game" ] ]
-                )
+            withNavigation join
 
         _ ->
-            viewInitial
+            initial

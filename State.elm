@@ -7,7 +7,7 @@ import Types
         , Player
         , Model
         , CurrentView
-            ( CreatingGame
+            ( InLobby
             , JoiningGame
             , Intro
             )
@@ -32,7 +32,7 @@ modelFromLocation model location =
         , currentView =
             case (Debug.log "hash" location.hash) of
                 "#new" ->
-                    CreatingGame
+                    InLobby
 
                 "#join" ->
                     JoiningGame

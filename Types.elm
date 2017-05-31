@@ -5,7 +5,7 @@ import Navigation exposing (Location)
 
 type CurrentView
     = Intro
-    | CreatingGame
+    | InLobby
     | JoiningGame
     | Playing
 
