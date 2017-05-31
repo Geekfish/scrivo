@@ -17,14 +17,14 @@ import Html.Attributes
 import Types
     exposing
         ( Msg
-        , CurrentView(InLobby, JoiningGame)
+        , Route
         , Player
         , Model
         )
 
 
-initial : Html Msg
-initial =
+initial : Model -> Html Msg
+initial model =
     div [ class "container-fluid vertical-center" ]
         [ div
             [ class "start col-md-6 col-md-offset-3" ]
@@ -36,7 +36,7 @@ initial =
                     [ class "col-md-6" ]
                     [ a
                         [ class "btn btn-primary btn-lg"
-                        , href "#new"
+                        , href ("#game/" ++ model.gameCode)
                         , attribute "role" "button"
                         ]
                         [ text "New Game" ]
@@ -188,12 +188,12 @@ withNavigation msg =
 
 view : Model -> Html Msg
 view model =
-    case model.currentView of
-        InLobby ->
+    case model.route of
+        Types.LobbyRoute gameCode ->
             withNavigation lobby
 
-        JoiningGame ->
+        Types.JoinRoute ->
             withNavigation join
 
         _ ->
-            initial
+            initial model

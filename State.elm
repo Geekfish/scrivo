@@ -1,16 +1,13 @@
 module State exposing (..)
 
 import Navigation
+import Routing exposing (parseLocation)
 import Types
     exposing
-        ( Msg(UrlChange, SetGameState)
+        ( Msg
         , Player
         , Model
-        , CurrentView
-            ( InLobby
-            , JoiningGame
-            , Intro
-            )
+        , Route
         )
 
 
@@ -21,7 +18,7 @@ initialModel =
     , alertMessage = Nothing
     , nameInput = ""
     , history = []
-    , currentView = Intro
+    , route = Types.HomeRoute
     }
 
 
@@ -29,29 +26,20 @@ modelFromLocation : Model -> Navigation.Location -> Model
 modelFromLocation model location =
     { model
         | history = location :: model.history
-        , currentView =
-            case (Debug.log "hash" location.hash) of
-                "#new" ->
-                    InLobby
-
-                "#join" ->
-                    JoiningGame
-
-                _ ->
-                    Intro
+        , route = parseLocation location
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UrlChange location ->
+        Types.UrlChange location ->
             ( modelFromLocation model location, Cmd.none )
 
-        SetGameState currentView ->
-            ( { model | currentView = currentView }, Cmd.none )
+        Types.SetGameState route ->
+            ( { model | route = route }, Cmd.none )
 
 
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
-    ( initialModel, Cmd.none )
+    ( modelFromLocation initialModel location, Cmd.none )

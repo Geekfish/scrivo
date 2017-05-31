@@ -3,11 +3,11 @@ module Types exposing (..)
 import Navigation exposing (Location)
 
 
-type CurrentView
-    = Intro
-    | InLobby
-    | JoiningGame
-    | Playing
+type Route
+    = HomeRoute
+    | LobbyRoute GameCode
+    | JoinRoute
+    | NotFoundRoute
 
 
 type alias Model =
@@ -15,9 +15,13 @@ type alias Model =
     , gameCode : String
     , alertMessage : Maybe String
     , nameInput : String
-    , currentView : CurrentView
+    , route : Route
     , history : List Navigation.Location
     }
+
+
+type alias GameCode =
+    String
 
 
 type alias Player =
@@ -26,4 +30,4 @@ type alias Player =
 
 type Msg
     = UrlChange Navigation.Location
-    | SetGameState CurrentView
+    | SetGameState Route
