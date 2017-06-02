@@ -3,3 +3,11 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 scrivo.js
+
+# Elixir:
+/_build
+/cover
+/deps
+erl_crash.dump
+*.ez
+*.beam
