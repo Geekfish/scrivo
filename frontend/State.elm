@@ -1,5 +1,6 @@
 module State exposing (..)
 
+import Phoenix.Socket
 import Navigation
 import Routing exposing (parseLocation)
 import Types
@@ -19,6 +20,7 @@ initialModel =
     , nameInput = ""
     , history = []
     , route = Types.HomeRoute
+    , socket = Phoenix.Socket.init "ws://localhost:4000/socket/websocket"
     }
 
 
@@ -38,6 +40,20 @@ update msg model =
 
         Types.SetGameState route ->
             ( { model | route = route }, Cmd.none )
+
+        Types.PhoenixMsg msg ->
+            let
+                ( socket, cmd ) =
+                    Phoenix.Socket.update msg model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Phoenix.Socket.listen model.socket Types.PhoenixMsg
 
 
 init : Navigation.Location -> ( Model, Cmd Msg )

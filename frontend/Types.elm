@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Phoenix.Socket
 import Navigation exposing (Location)
 
 
@@ -17,6 +18,7 @@ type alias Model =
     , nameInput : String
     , route : Route
     , history : List Navigation.Location
+    , socket : Phoenix.Socket.Socket Msg
     }
 
 
@@ -31,3 +33,4 @@ type alias Player =
 type Msg
     = UrlChange Navigation.Location
     | SetGameState Route
+    | PhoenixMsg (Phoenix.Socket.Msg Msg)
