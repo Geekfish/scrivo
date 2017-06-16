@@ -14,6 +14,7 @@ import Html.Attributes
         , placeholder
         , name
         )
+import Html.Events exposing (onClick)
 import Types
     exposing
         ( Msg
@@ -36,7 +37,7 @@ initial model =
                     [ class "col-md-6" ]
                     [ a
                         [ class "btn btn-primary btn-lg"
-                        , href ("#game/" ++ model.gameCode)
+                        , onClick Types.StartGame
                         , attribute "role" "button"
                         ]
                         [ text "New Game" ]
@@ -73,8 +74,9 @@ navigation =
         ]
 
 
-lobby : Html Msg
-lobby =
+lobby : String -> Html Msg
+lobby gameCode =
+    -- TODO: make an alias for game code so it's not a "String"
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -84,7 +86,7 @@ lobby =
                 [ h2 [] [ text "Game Code" ]
                 , div
                     [ class "game-code round-colored-container" ]
-                    [ text "BJKWPTQ" ]
+                    [ text gameCode ]
                 , div
                     []
                     [ h2
@@ -190,7 +192,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation lobby
+            withNavigation (lobby gameCode)
 
         Types.JoinRoute ->
             withNavigation join

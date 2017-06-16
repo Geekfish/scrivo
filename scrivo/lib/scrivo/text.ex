@@ -1,4 +1,4 @@
-defmodule GameCodeGenerator do
+defmodule Scrivo.GameCodeGenerator do
   @chars "ABCDEFGHIJKLMNOPQRSTUVWXYZ" |> String.split("")
 
   def code_of_length(length) do

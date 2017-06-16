@@ -26,6 +26,11 @@ type alias GameCode =
     String
 
 
+type alias Game =
+    { game_code : GameCode
+    }
+
+
 type alias Player =
     { name : String }
 
@@ -33,4 +38,6 @@ type alias Player =
 type Msg
     = UrlChange Navigation.Location
     | SetGameState Route
+    | JoinGameLobby
+    | StartGame
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
