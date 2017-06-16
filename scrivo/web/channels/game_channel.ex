@@ -6,7 +6,7 @@ defmodule Scrivo.GameChannel do
 
   require Logger
 
-  def join("game:lobby", _params, socket) do
+  def join("game:main", _params, socket) do
       Logger.debug "Joined lobby!"
       {:ok, socket}
   end
@@ -20,7 +20,7 @@ defmodule Scrivo.GameChannel do
       new_game_code = GameCodeGenerator.code_of_length(8)
     #   game = {new_game_id}
     #   GameServer.call(__MODULE__, {:create_or_update, game})
-      {:ok, %{ game_code: new_game_code }, socket}
+      {:reply, {:ok, %{game_code: new_game_code}}, socket}
   end
 
   def handle_in("new:player", params, socket) do

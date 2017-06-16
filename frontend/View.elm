@@ -37,7 +37,7 @@ initial model =
                     [ class "col-md-6" ]
                     [ a
                         [ class "btn btn-primary btn-lg"
-                        , onClick Types.StartGame
+                        , onClick Types.TriggerNewGame
                         , attribute "role" "button"
                         ]
                         [ text "New Game" ]

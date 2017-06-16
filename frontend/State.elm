@@ -45,15 +45,15 @@ newGameDecoder =
         (Json.Decode.field "game_code" Json.Decode.string)
 
 
-handleNewGame : Json.Encode.Value -> Msg
-handleNewGame value =
+handleNewGameRequest : Json.Encode.Value -> Msg
+handleNewGameRequest value =
     case Json.Decode.decodeValue newGameDecoder value of
         Ok game ->
             let
                 game_code =
-                    Debug.log game.game_code
+                    Debug.log game.gameCode
             in
-                Types.SetGameState (Types.LobbyRoute game.game_code)
+                Types.HandleNewGameCode game.gameCode
 
         Err error ->
             Types.SetGameState Types.HomeRoute
@@ -68,10 +68,10 @@ update msg model =
         Types.SetGameState route ->
             ( { model | route = route }, Cmd.none )
 
-        Types.JoinGameLobby ->
+        Types.JoinMainChannel ->
             let
                 channel =
-                    Phoenix.Channel.init "game:lobby"
+                    Phoenix.Channel.init "game:main"
 
                 ( socket, cmd ) =
                     Phoenix.Socket.join channel model.socket
@@ -80,10 +80,11 @@ update msg model =
                 , Cmd.map Types.PhoenixMsg cmd
                 )
 
-        Types.StartGame ->
+        Types.TriggerNewGame ->
             let
                 push =
-                    Phoenix.Push.init "new:game" "game:lobby"
+                    Phoenix.Push.init "new:game" "game:main"
+                        |> Phoenix.Push.onOk handleNewGameRequest
 
                 ( socket, cmd ) =
                     Phoenix.Socket.push push model.socket
@@ -91,6 +92,14 @@ update msg model =
                 ( { model | socket = socket }
                 , Cmd.map Types.PhoenixMsg cmd
                 )
+
+        Types.HandleNewGameCode gameCode ->
+            update
+                (Types.SetGameState (Types.LobbyRoute gameCode))
+                { model | gameCode = gameCode }
+
+        Types.JoinGame ->
+            model ! []
 
         Types.PhoenixMsg msg ->
             let
@@ -111,7 +120,7 @@ joinMainLobby : Model -> ( Model, Cmd Msg )
 joinMainLobby model =
     let
         channel =
-            Phoenix.Channel.init "game:lobby"
+            Phoenix.Channel.init "game:main"
 
         ( socket, cmd ) =
             Phoenix.Socket.join channel model.socket
