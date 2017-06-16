@@ -5,10 +5,6 @@
 # is restricted to this project.
 use Mix.Config
 
-# General application configuration
-config :scrivo,
-  ecto_repos: [Scrivo.Repo]
-
 # Configures the endpoint
 config :scrivo, Scrivo.Endpoint,
   url: [host: "localhost"],
