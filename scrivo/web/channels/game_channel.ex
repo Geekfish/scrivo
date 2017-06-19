@@ -18,8 +18,8 @@ defmodule Scrivo.GameChannel do
 
   def handle_in("new:game", _params, socket) do
       new_game_code = GameCodeGenerator.code_of_length(8)
-    #   game = {new_game_id}
-    #   GameServer.call(__MODULE__, {:create_or_update, game})
+      game = {new_game_code, {}}
+      GameServer.create_or_update(game)
       {:reply, {:ok, %{game_code: new_game_code}}, socket}
   end
 
