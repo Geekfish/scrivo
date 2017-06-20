@@ -49,11 +49,7 @@ handleNewGameRequest : Json.Encode.Value -> Msg
 handleNewGameRequest value =
     case Json.Decode.decodeValue newGameDecoder value of
         Ok game ->
-            let
-                game_code =
-                    Debug.log game.gameCode
-            in
-                Types.HandleNewGameCode game.gameCode
+            Types.HandleNewGameCode game.gameCode
 
         Err error ->
             Types.SetGameState Types.HomeRoute
@@ -94,9 +90,9 @@ update msg model =
                 )
 
         Types.HandleNewGameCode gameCode ->
-            update
-                (Types.SetGameState (Types.LobbyRoute gameCode))
-                { model | gameCode = gameCode }
+            ( { model | gameCode = gameCode }
+            , gameCode |> Routing.gamePath |> Navigation.newUrl
+            )
 
         Types.JoinGame ->
             model ! []
