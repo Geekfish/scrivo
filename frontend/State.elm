@@ -55,9 +55,9 @@ handleNewGameRequest value =
             Types.SetGameState Types.HomeRoute
 
 
-handleRouting : Types.Route -> Model -> ( Model, Cmd Msg )
-handleRouting route model =
-    case route of
+handleRouting : Model -> ( Model, Cmd Msg )
+handleRouting model =
+    case model.route of
         Types.LobbyRoute gameCode ->
             let
                 channel =
@@ -85,7 +85,7 @@ update msg model =
             ( modelFromLocation location model, Cmd.none )
 
         Types.SetGameState route ->
-            handleRouting route ({ model | route = route })
+            handleRouting { model | route = route }
 
         Types.JoinMainChannel ->
             let
@@ -152,9 +152,12 @@ joinMainLobby model =
 init : Navigation.Location -> ( Model, Cmd Msg )
 init location =
     let
-        ( model, cmd ) =
+        ( model, joinLobbyCmd ) =
             initialModel
                 |> modelFromLocation location
                 |> joinMainLobby
+
+        ( routedModel, routingCmd ) =
+            handleRouting model
     in
-        ( model, cmd )
+        ( routedModel, Cmd.batch [ joinLobbyCmd, routingCmd ] )
