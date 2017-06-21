@@ -55,6 +55,29 @@ handleNewGameRequest value =
             Types.SetGameState Types.HomeRoute
 
 
+handleRouting : Types.Route -> Model -> ( Model, Cmd Msg )
+handleRouting route model =
+    case route of
+        Types.LobbyRoute gameCode ->
+            let
+                channel =
+                    Phoenix.Channel.init ("game:" ++ gameCode)
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.join channel model.socket
+            in
+                ( { model | socket = socket, gameCode = gameCode }
+                , Cmd.batch
+                    ([ Cmd.map Types.PhoenixMsg cmd
+                     , gameCode |> Routing.gamePath |> Navigation.newUrl
+                     ]
+                    )
+                )
+
+        _ ->
+            model ! []
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -62,7 +85,7 @@ update msg model =
             ( modelFromLocation location model, Cmd.none )
 
         Types.SetGameState route ->
-            ( { model | route = route }, Cmd.none )
+            handleRouting route ({ model | route = route })
 
         Types.JoinMainChannel ->
             let
@@ -90,9 +113,9 @@ update msg model =
                 )
 
         Types.HandleNewGameCode gameCode ->
-            ( { model | gameCode = gameCode }
-            , gameCode |> Routing.gamePath |> Navigation.newUrl
-            )
+            update
+                (Types.SetGameState (Types.LobbyRoute gameCode))
+                model
 
         Types.JoinGame ->
             model ! []

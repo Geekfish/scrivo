@@ -22,6 +22,11 @@ defmodule Scrivo.GameServer do
       GenServer.call(__MODULE__, {:create_or_update, game})
   end
 
+  def get(game_code) do
+      Logger.debug "Fetch a game"
+      GenServer.call(__MODULE__, {:get, game_code})
+  end
+
   ## GenServer
   def handle_call({:create_or_update, {game_code, players}}, _from, _state) do
       Logger.debug "GenServer handling: Create or update game"

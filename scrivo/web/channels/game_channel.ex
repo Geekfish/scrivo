@@ -11,10 +11,11 @@ defmodule Scrivo.GameChannel do
       {:ok, socket}
   end
 
-  # def join("game:g:" <> game_code, _params, socket) do
-  #     game = GameServer.call(__MODULE__, {:get, game_code}) |> tl
-  #     {:ok, %{ game: game }, socket}
-  # end
+  def join("game:" <> game_code, _params, socket) do
+      Logger.debug "Joined game " <> game_code
+      game = GameServer.get(game_code) |> tl
+      {:ok, %{ game: game }, socket}
+  end
 
   def handle_in("new:game", _params, socket) do
       new_game_code = GameCodeGenerator.code_of_length(8)
