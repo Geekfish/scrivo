@@ -15,6 +15,7 @@ type alias Model =
     { name : String
     , gameCode : String
     , alertMessage : Maybe String
+    , gameCodeInput : String
     , nameInput : String
     , route : Route
     , history : List Navigation.Location
@@ -39,7 +40,8 @@ type Msg
     = UrlChange Navigation.Location
     | SetGameState Route
     | JoinMainChannel
-    | JoinGame
+    | JoinGameFromForm
     | TriggerNewGame
     | HandleNewGameCode GameCode
+    | UpdateGameCodeInput GameCode
     | PhoenixMsg (Phoenix.Socket.Msg Msg)

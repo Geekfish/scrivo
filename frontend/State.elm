@@ -21,6 +21,7 @@ initialModel : Model
 initialModel =
     { name = "Anonymous"
     , gameCode = ""
+    , gameCodeInput = ""
     , alertMessage = Nothing
     , nameInput = ""
     , history = []
@@ -117,8 +118,17 @@ update msg model =
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
-        Types.JoinGame ->
-            model ! []
+        Types.UpdateGameCodeInput gameCode_ ->
+            let
+                gameCode =
+                    Debug.log gameCode_
+            in
+                { model | gameCodeInput = gameCode_ } ! []
+
+        Types.JoinGameFromForm ->
+            update
+                (Types.HandleNewGameCode model.gameCodeInput)
+                model
 
         Types.PhoenixMsg msg ->
             let

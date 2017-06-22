@@ -13,8 +13,10 @@ import Html.Attributes
         , title
         , placeholder
         , name
+        , disabled
+        , action
         )
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput, onSubmit)
 import Types
     exposing
         ( Msg
@@ -22,6 +24,11 @@ import Types
         , Player
         , Model
         )
+
+
+isEmpty : String -> Bool
+isEmpty =
+    String.isEmpty << String.trim
 
 
 initial : Model -> Html Msg
@@ -150,8 +157,8 @@ playerStatus player =
             ]
 
 
-join : Html Msg
-join =
+join : String -> Html Msg
+join newGameInput =
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -160,7 +167,10 @@ join =
                 [ class "col-md-2 col-md-offset-5" ]
                 [ h2 [ class "text-center" ] [ text "Join a game" ]
                 , form
-                    [ class "form round-container" ]
+                    [ class "form round-container"
+                    , onSubmit Types.JoinGameFromForm
+                    , action "javascript:void(0);"
+                    ]
                     [ div
                         [ class "form-group" ]
                         [ input
@@ -170,10 +180,14 @@ join =
                             , id "game-code"
                             , name "game-code"
                             , placeholder "ex. GKLPX"
+                            , onInput Types.UpdateGameCodeInput
                             ]
                             []
                         , button
-                            [ class "btn btn-lg btn-success btn-group-justified" ]
+                            [ class "btn btn-lg btn-success btn-group-justified"
+                            , type_ "submit"
+                            , disabled <| isEmpty newGameInput
+                            ]
                             [ text "Join" ]
                         ]
                     ]
@@ -195,7 +209,7 @@ view model =
             withNavigation (lobby gameCode)
 
         Types.JoinRoute ->
-            withNavigation join
+            withNavigation (join model.gameCodeInput)
 
         _ ->
             initial model
