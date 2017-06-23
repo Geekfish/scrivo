@@ -50,7 +50,7 @@ handleNewGameRequest : Json.Encode.Value -> Msg
 handleNewGameRequest value =
     case Json.Decode.decodeValue newGameDecoder value of
         Ok game ->
-            Types.HandleNewGameCode game.gameCode
+            Types.JoinGame game.gameCode
 
         Err error ->
             Types.SetGameState Types.HomeRoute
@@ -113,21 +113,20 @@ update msg model =
                 , Cmd.map Types.PhoenixMsg cmd
                 )
 
-        Types.HandleNewGameCode gameCode ->
+        Types.JoinGame gameCode ->
             update
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
-        Types.UpdateGameCodeInput gameCode_ ->
-            let
-                gameCode =
-                    Debug.log gameCode_
-            in
-                { model | gameCodeInput = gameCode_ } ! []
+        Types.UpdateInputGameCode gameCode ->
+            { model | gameCodeInput = gameCode } ! []
 
-        Types.JoinGameFromForm ->
+        Types.UpdateInputName name ->
+            { model | nameInput = name } ! []
+
+        Types.SubmitGameCode ->
             update
-                (Types.HandleNewGameCode model.gameCodeInput)
+                (Types.JoinGame model.gameCodeInput)
                 model
 
         Types.PhoenixMsg msg ->

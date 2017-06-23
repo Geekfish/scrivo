@@ -36,12 +36,26 @@ type alias Player =
     { name : String }
 
 
-type Msg
+type
+    Msg
+    --
+    -- Navigation
     = UrlChange Navigation.Location
     | SetGameState Route
+      --
+      -- Passive State Handling
     | JoinMainChannel
-    | JoinGameFromForm
     | TriggerNewGame
-    | HandleNewGameCode GameCode
-    | UpdateGameCodeInput GameCode
+      --
+      -- Game Events
+    | JoinGame GameCode
+      --
+      -- Form Submission
+    | SubmitGameCode
+      --
+      -- Input Handling
+    | UpdateInputGameCode GameCode
+    | UpdateInputName String
+      --
+      -- Sockets
     | PhoenixMsg (Phoenix.Socket.Msg Msg)

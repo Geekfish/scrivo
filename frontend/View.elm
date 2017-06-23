@@ -111,6 +111,7 @@ lobby gameCode =
                                 , id "nickname"
                                 , name "nickname"
                                 , placeholder "Your pen name"
+                                , onInput Types.UpdateInputName
                                 ]
                                 []
                             , button
@@ -169,7 +170,7 @@ join newGameInput =
                 [ h2 [ class "text-center" ] [ text "Join a game" ]
                 , form
                     [ class "form round-container"
-                    , onSubmit Types.JoinGameFromForm
+                    , onSubmit Types.SubmitGameCode
                     , action "javascript:void(0);"
                     ]
                     [ div
@@ -181,7 +182,7 @@ join newGameInput =
                             , id "game-code"
                             , name "game-code"
                             , placeholder "ex. GKLPX"
-                            , onInput Types.UpdateGameCodeInput
+                            , onInput Types.UpdateInputGameCode
                             ]
                             []
                         , button
