@@ -49,9 +49,12 @@ type
       --
       -- Game Events
     | JoinGame GameCode
+    | RegisterPlayerName String
+    | UpdatePlayerName String
       --
       -- Form Submission
     | SubmitGameCode
+    | SubmitName
       --
       -- Input Handling
     | UpdateInputGameCode GameCode

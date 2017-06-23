@@ -56,13 +56,39 @@ handleNewGameRequest value =
             Types.SetGameState Types.HomeRoute
 
 
+playerDecoder : Json.Decode.Decoder Types.Player
+playerDecoder =
+    Json.Decode.map Types.Player
+        (Json.Decode.field "name" Json.Decode.string)
+
+
+handlePlayerRegistration : Json.Encode.Value -> Msg
+handlePlayerRegistration value =
+    case Json.Decode.decodeValue playerDecoder value of
+        Ok player ->
+            Types.UpdatePlayerName player.name
+
+        Err error ->
+            Types.SetGameState Types.HomeRoute
+
+
+getGameChannel : String -> String
+getGameChannel =
+    (++) "game:"
+
+
+mainChannel : String
+mainChannel =
+    "game:main"
+
+
 handleRouting : Model -> ( Model, Cmd Msg )
 handleRouting model =
     case model.route of
         Types.LobbyRoute gameCode ->
             let
                 channel =
-                    Phoenix.Channel.init ("game:" ++ gameCode)
+                    Phoenix.Channel.init <| getGameChannel gameCode
 
                 ( socket, cmd ) =
                     Phoenix.Socket.join channel model.socket
@@ -95,7 +121,7 @@ update msg model =
         Types.JoinMainChannel ->
             let
                 channel =
-                    Phoenix.Channel.init "game:main"
+                    Phoenix.Channel.init mainChannel
 
                 ( socket, cmd ) =
                     Phoenix.Socket.join channel model.socket
@@ -107,7 +133,7 @@ update msg model =
         Types.TriggerNewGame ->
             let
                 push =
-                    Phoenix.Push.init "new:game" "game:main"
+                    Phoenix.Push.init "new:game" mainChannel
                         |> Phoenix.Push.onOk handleNewGameRequest
 
                 ( socket, cmd ) =
@@ -124,11 +150,33 @@ update msg model =
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
+        Types.RegisterPlayerName playerName ->
+            let
+                push =
+                    getGameChannel model.gameCode
+                        |> Phoenix.Push.init "player:register"
+                        |> Phoenix.Push.onOk handlePlayerRegistration
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
+
+        Types.UpdatePlayerName playerName ->
+            { model | name = playerName } ! []
+
         --
         -- Form Submission
         Types.SubmitGameCode ->
             update
                 (Types.JoinGame model.gameCodeInput)
+                model
+
+        Types.SubmitName ->
+            update
+                (Types.RegisterPlayerName model.nameInput)
                 model
 
         --
