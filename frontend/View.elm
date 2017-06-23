@@ -15,6 +15,7 @@ import Html.Attributes
         , name
         , disabled
         , action
+        , value
         )
 import Html.Events
     exposing
@@ -62,7 +63,7 @@ initial model =
                         , href "#join"
                         , attribute "role" "button"
                         ]
-                        [ text "Join an existing game" ]
+                        [ text "Join Game" ]
                     ]
                 ]
             ]
@@ -87,11 +88,12 @@ navigation =
         ]
 
 
-playerNameSection : String -> List (Html Msg)
-playerNameSection playerName =
+playerNameSection : String -> String -> List (Html Msg)
+playerNameSection playerName inputValue =
     case playerName of
         "" ->
-            [ p [] [ text "What should we call you?" ]
+            [ h2 [] [ text "You" ]
+            , p [] [ text "What should we call you?" ]
             , form
                 [ class "form round-container"
                 , onSubmit Types.SubmitName
@@ -106,6 +108,7 @@ playerNameSection playerName =
                         , id "nickname"
                         , name "nickname"
                         , placeholder "Your pen name"
+                        , value inputValue
                         , onInput Types.UpdateInputName
                         ]
                         []
@@ -117,16 +120,11 @@ playerNameSection playerName =
             ]
 
         _ ->
-            [ div
-                [ class "game-code round-colored-container"
-                , onDoubleClick Types.DeleteName
-                ]
-                [ text playerName ]
-            ]
+            []
 
 
-lobby : Types.GameCode -> String -> Html Msg
-lobby gameCode playerName =
+lobby : Types.GameCode -> String -> String -> Html Msg
+lobby gameCode playerName nameInputValue =
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -140,12 +138,7 @@ lobby gameCode playerName =
                     [ text gameCode ]
                 , div
                     []
-                    ([ h2
-                        []
-                        [ text "You" ]
-                     ]
-                        ++ (playerNameSection playerName)
-                    )
+                    (playerNameSection playerName nameInputValue)
                 ]
             , div
                 [ class "col-md-3" ]
@@ -154,25 +147,25 @@ lobby gameCode playerName =
                     [ text "The Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
-                    [ playerStatus (Just { name = "MadMax15234" })
-                    , playerStatus (Just { name = "Popotin" })
-                    , playerStatus Nothing
+                    [ playerStatus { name = playerName, isUser = True }
+                    , playerStatus { name = "MadMax15234", isUser = False }
+                    , playerStatus { name = "Popotin", isUser = False }
                     ]
                 ]
             ]
         ]
 
 
-playerStatus : Maybe Player -> Html Msg
+playerStatus : Player -> Html Msg
 playerStatus player =
     let
         ( icon, nickname ) =
-            case player of
-                Just player ->
-                    ( "ok", player.name )
+            case player.name of
+                "" ->
+                    ( "time", "-- You --" )
 
-                Nothing ->
-                    ( "pencil", "-- Free spot --" )
+                _ ->
+                    ( "ok", player.name )
     in
         li
             []
@@ -181,7 +174,23 @@ playerStatus player =
                 []
             , span
                 [ class "nickname" ]
-                [ text nickname ]
+                [ if player.isUser && player.name /= "" then
+                    strong
+                        []
+                        [ a
+                            [ onClick Types.DeleteName
+                            ]
+                            [ text nickname
+                            , text "  "
+                            , span
+                                [ class "glyphicon glyphicon-pencil"
+                                ]
+                                []
+                            ]
+                        ]
+                  else
+                    text nickname
+                ]
             ]
 
 
@@ -234,7 +243,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation (lobby gameCode model.name)
+            withNavigation (lobby gameCode model.name model.nameInput)
 
         Types.JoinRoute ->
             withNavigation (join model.gameCodeInput)

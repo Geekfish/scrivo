@@ -33,7 +33,9 @@ type alias Game =
 
 
 type alias Player =
-    { name : String }
+    { name : String
+    , isUser : Bool
+    }
 
 
 type
@@ -45,7 +47,6 @@ type
       --
       -- Passive State Handling
     | JoinMainChannel
-    | TriggerNewGame
       --
       -- Game Events
     | JoinGame GameCode
@@ -60,7 +61,8 @@ type
     | UpdateInputGameCode GameCode
     | UpdateInputName String
       --
-      -- UI Events
+      -- Other UI Events
+    | TriggerNewGame
     | DeleteName
       --
       -- Sockets

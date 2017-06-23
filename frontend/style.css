@@ -4,7 +4,7 @@ body, html {
     font-family: 'Open Sans', sans-serif;
 }
 
-h1, a {
+h1 {
     font-family:    'Delius', cursive;
 }
 
@@ -17,6 +17,15 @@ h1, h2, h3, p {
     width: 100%;
     line-height: 1.75;
     font-weight: 300;
+}
+
+a, .btn-link {
+    color: #fafafa;
+    cursor: pointer;
+}
+
+a:hover, .btn-link:hover {
+    color: #e7e968;
 }
 
 p {
@@ -95,6 +104,7 @@ p {
 
 .round-container {
     padding: 8px;
+    border-radius: 6px;
 }
 
 .round-colored-container {

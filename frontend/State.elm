@@ -5,6 +5,8 @@ import Phoenix.Channel
 import Phoenix.Push
 import Json.Encode
 import Json.Decode
+import Json.Decode exposing (int, string, float, bool, Decoder)
+import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Debug
 import Navigation
 import Routing exposing (parseLocation)
@@ -56,10 +58,11 @@ handleNewGameRequest value =
             Types.SetGameState Types.HomeRoute
 
 
-playerDecoder : Json.Decode.Decoder Types.Player
+playerDecoder : Decoder Types.Player
 playerDecoder =
-    Json.Decode.map Types.Player
-        (Json.Decode.field "name" Json.Decode.string)
+    decode Types.Player
+        |> required "name" string
+        |> optional "isUser" bool False
 
 
 handlePlayerRegistration : Json.Encode.Value -> Msg
@@ -135,19 +138,6 @@ update msg model =
                 , Cmd.map Types.PhoenixMsg cmd
                 )
 
-        Types.TriggerNewGame ->
-            let
-                push =
-                    Phoenix.Push.init "new:game" mainChannel
-                        |> Phoenix.Push.onOk handleNewGameRequest
-
-                ( socket, cmd ) =
-                    Phoenix.Socket.push push model.socket
-            in
-                ( { model | socket = socket }
-                , Cmd.map Types.PhoenixMsg cmd
-                )
-
         --
         -- Game Events
         Types.JoinGame gameCode ->
@@ -195,6 +185,19 @@ update msg model =
 
         --
         -- UI Events
+        Types.TriggerNewGame ->
+            let
+                push =
+                    Phoenix.Push.init "new:game" mainChannel
+                        |> Phoenix.Push.onOk handleNewGameRequest
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
+
         Types.DeleteName ->
             { model | name = "" } ! []
 
