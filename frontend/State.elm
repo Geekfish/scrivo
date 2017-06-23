@@ -82,12 +82,16 @@ handleRouting model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        --
+        -- Navigation
         Types.UrlChange location ->
             ( modelFromLocation location model, Cmd.none )
 
         Types.SetGameState route ->
             handleRouting { model | route = route }
 
+        --
+        -- Passive State Handling
         Types.JoinMainChannel ->
             let
                 channel =
@@ -113,22 +117,30 @@ update msg model =
                 , Cmd.map Types.PhoenixMsg cmd
                 )
 
+        --
+        -- Game Events
         Types.JoinGame gameCode ->
             update
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
+        --
+        -- Form Submission
+        Types.SubmitGameCode ->
+            update
+                (Types.JoinGame model.gameCodeInput)
+                model
+
+        --
+        -- Input Handling
         Types.UpdateInputGameCode gameCode ->
             { model | gameCodeInput = gameCode } ! []
 
         Types.UpdateInputName name ->
             { model | nameInput = name } ! []
 
-        Types.SubmitGameCode ->
-            update
-                (Types.JoinGame model.gameCodeInput)
-                model
-
+        --
+        -- Sockets
         Types.PhoenixMsg msg ->
             let
                 ( socket, cmd ) =

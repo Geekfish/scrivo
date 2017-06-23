@@ -14,9 +14,9 @@ type Route
 type alias Model =
     { name : String
     , gameCode : String
-    , alertMessage : Maybe String
     , gameCodeInput : String
     , nameInput : String
+    , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
     , socket : Phoenix.Socket.Socket Msg
