@@ -19,11 +19,11 @@ import Types
 
 initialModel : Model
 initialModel =
-    { name = "Anonymous"
+    { name = ""
     , gameCode = ""
     , gameCodeInput = ""
-    , alertMessage = Nothing
     , nameInput = ""
+    , alertMessage = Nothing
     , history = []
     , route = Types.HomeRoute
     , socket =

@@ -81,16 +81,16 @@ navigation =
         ]
 
 
-lobby : String -> Html Msg
+lobby : Types.GameCode -> Html Msg
 lobby gameCode =
-    -- TODO: make an alias for game code so it's not a "String"
     div
         [ class "container-fluid main-content" ]
         [ div
             [ class "row flex-row" ]
             [ div
                 [ class "col-md-3 col-md-offset-3" ]
-                [ h2 [] [ text "Game Code" ]
+                [ h2 [] [ text "The Game Code" ]
+                , p [] [ text "Share this code with others who want to join the game." ]
                 , div
                     [ class "game-code round-colored-container" ]
                     [ text gameCode ]
@@ -98,7 +98,8 @@ lobby gameCode =
                     []
                     [ h2
                         []
-                        [ text "Profile" ]
+                        [ text "You" ]
+                    , p [] [ text "What should we call you?" ]
                     , form
                         [ class "form round-container" ]
                         [ div
@@ -109,7 +110,7 @@ lobby gameCode =
                                 , maxlength 12
                                 , id "nickname"
                                 , name "nickname"
-                                , placeholder "Your name"
+                                , placeholder "Your pen name"
                                 ]
                                 []
                             , button
@@ -123,7 +124,7 @@ lobby gameCode =
                 [ class "col-md-3" ]
                 [ h2
                     []
-                    [ text "Players Joined" ]
+                    [ text "The Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
                     [ playerStatus (Just { name = "MadMax15234" })
