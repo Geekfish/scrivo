@@ -60,5 +60,8 @@ type
     | UpdateInputGameCode GameCode
     | UpdateInputName String
       --
+      -- UI Events
+    | DeleteName
+      --
       -- Sockets
     | PhoenixMsg (Phoenix.Socket.Msg Msg)

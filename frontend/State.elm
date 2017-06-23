@@ -40,15 +40,15 @@ modelFromLocation location model =
     }
 
 
-newGameDecoder : Json.Decode.Decoder Types.Game
-newGameDecoder =
+gameDecoder : Json.Decode.Decoder Types.Game
+gameDecoder =
     Json.Decode.map Types.Game
         (Json.Decode.field "game_code" Json.Decode.string)
 
 
 handleNewGameRequest : Json.Encode.Value -> Msg
 handleNewGameRequest value =
-    case Json.Decode.decodeValue newGameDecoder value of
+    case Json.Decode.decodeValue gameDecoder value of
         Ok game ->
             Types.JoinGame game.gameCode
 
@@ -66,7 +66,11 @@ handlePlayerRegistration : Json.Encode.Value -> Msg
 handlePlayerRegistration value =
     case Json.Decode.decodeValue playerDecoder value of
         Ok player ->
-            Types.UpdatePlayerName player.name
+            let
+                foo =
+                    Debug.log ("HAI")
+            in
+                Types.UpdatePlayerName player.name
 
         Err error ->
             Types.SetGameState Types.HomeRoute
@@ -80,6 +84,11 @@ getGameChannel =
 mainChannel : String
 mainChannel =
     "game:main"
+
+
+registerPlayerParams : String -> Json.Encode.Value
+registerPlayerParams name =
+    Json.Encode.object [ ( "name", Json.Encode.string name ) ]
 
 
 handleRouting : Model -> ( Model, Cmd Msg )
@@ -154,7 +163,8 @@ update msg model =
             let
                 push =
                     getGameChannel model.gameCode
-                        |> Phoenix.Push.init "player:register"
+                        |> Phoenix.Push.init "new:player"
+                        |> Phoenix.Push.withPayload (registerPlayerParams playerName)
                         |> Phoenix.Push.onOk handlePlayerRegistration
 
                 ( socket, cmd ) =
@@ -186,6 +196,11 @@ update msg model =
 
         Types.UpdateInputName name ->
             { model | nameInput = name } ! []
+
+        --
+        -- UI Events
+        Types.DeleteName ->
+            { model | name = "" } ! []
 
         --
         -- Sockets

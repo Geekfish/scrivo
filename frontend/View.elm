@@ -16,7 +16,13 @@ import Html.Attributes
         , disabled
         , action
         )
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Events
+    exposing
+        ( onClick
+        , onInput
+        , onSubmit
+        , onDoubleClick
+        )
 import Types
     exposing
         ( Msg
@@ -81,8 +87,46 @@ navigation =
         ]
 
 
-lobby : Types.GameCode -> Html Msg
-lobby gameCode =
+playerNameSection : String -> List (Html Msg)
+playerNameSection playerName =
+    case playerName of
+        "" ->
+            [ p [] [ text "What should we call you?" ]
+            , form
+                [ class "form round-container"
+                , onSubmit Types.SubmitName
+                , action "javascript:void(0);"
+                ]
+                [ div
+                    [ class "form-group" ]
+                    [ input
+                        [ type_ "text"
+                        , class "form-control input-lg"
+                        , maxlength 12
+                        , id "nickname"
+                        , name "nickname"
+                        , placeholder "Your pen name"
+                        , onInput Types.UpdateInputName
+                        ]
+                        []
+                    , button
+                        [ class "btn btn-lg btn-success btn-group-justified" ]
+                        [ text "Ready ?" ]
+                    ]
+                ]
+            ]
+
+        _ ->
+            [ div
+                [ class "game-code round-colored-container"
+                , onDoubleClick Types.DeleteName
+                ]
+                [ text playerName ]
+            ]
+
+
+lobby : Types.GameCode -> String -> Html Msg
+lobby gameCode playerName =
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -96,30 +140,12 @@ lobby gameCode =
                     [ text gameCode ]
                 , div
                     []
-                    [ h2
+                    ([ h2
                         []
                         [ text "You" ]
-                    , p [] [ text "What should we call you?" ]
-                    , form
-                        [ class "form round-container" ]
-                        [ div
-                            [ class "form-group" ]
-                            [ input
-                                [ type_ "text"
-                                , class "form-control input-lg"
-                                , maxlength 12
-                                , id "nickname"
-                                , name "nickname"
-                                , placeholder "Your pen name"
-                                , onInput Types.UpdateInputName
-                                ]
-                                []
-                            , button
-                                [ class "btn btn-lg btn-success btn-group-justified" ]
-                                [ text "Ready ?" ]
-                            ]
-                        ]
-                    ]
+                     ]
+                        ++ (playerNameSection playerName)
+                    )
                 ]
             , div
                 [ class "col-md-3" ]
@@ -208,7 +234,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation (lobby gameCode)
+            withNavigation (lobby gameCode model.name)
 
         Types.JoinRoute ->
             withNavigation (join model.gameCodeInput)
