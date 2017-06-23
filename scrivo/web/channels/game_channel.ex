@@ -14,13 +14,14 @@ defmodule Scrivo.GameChannel do
   def join("game:" <> game_code, _params, socket) do
       Logger.debug "Joined game " <> game_code
       game = GameServer.get(game_code) |> tl
-      {:ok, %{ game: game }, socket}
+      {:ok, game, socket}
   end
 
   def handle_in("new:game", _params, socket) do
       new_game_code = GameCodeGenerator.code_of_length(8)
       GameServer.create_or_update(new_game_code)
-      {:reply, {:ok, %{game_code: new_game_code}}, socket}
+      game = %{game_code: new_game_code, players: []}
+      {:reply, {:ok, game}, socket}
   end
 
   def handle_in("new:player", params, socket) do
