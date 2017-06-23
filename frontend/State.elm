@@ -66,11 +66,7 @@ handlePlayerRegistration : Json.Encode.Value -> Msg
 handlePlayerRegistration value =
     case Json.Decode.decodeValue playerDecoder value of
         Ok player ->
-            let
-                foo =
-                    Debug.log ("HAI")
-            in
-                Types.UpdatePlayerName player.name
+            Types.UpdatePlayerName player.name
 
         Err error ->
             Types.SetGameState Types.HomeRoute
