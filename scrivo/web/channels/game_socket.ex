@@ -24,7 +24,8 @@ defmodule Scrivo.GameSocket do
   # performing token verification on connect.
   def connect(_params, socket) do
       Logger.debug "Connected to socket"
-      {:ok, socket}
+      user_id = Scrivo.GameCodeGenerator.code_of_length(32)
+      {:ok, assign(socket, :user_id, user_id)}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

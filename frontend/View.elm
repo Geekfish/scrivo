@@ -1,5 +1,6 @@
 module View exposing (..)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes
     exposing
@@ -92,7 +93,7 @@ playerNameSection : String -> String -> List (Html Msg)
 playerNameSection playerName inputValue =
     case playerName of
         "" ->
-            [ h2 [] [ text "You" ]
+            [ h2 [] [ text "Player" ]
             , p [] [ text "What should we call you?" ]
             , form
                 [ class "form round-container"
@@ -123,15 +124,15 @@ playerNameSection playerName inputValue =
             []
 
 
-lobby : Types.GameCode -> String -> String -> Html Msg
-lobby gameCode playerName nameInputValue =
+lobby : Types.GameCode -> String -> String -> List Types.Player -> Html Msg
+lobby gameCode playerName nameInputValue players =
     div
         [ class "container-fluid main-content" ]
         [ div
             [ class "row flex-row" ]
             [ div
                 [ class "col-md-3 col-md-offset-3" ]
-                [ h2 [] [ text "The Game Code" ]
+                [ h2 [] [ text "Game Code" ]
                 , p [] [ text "Share this code with others who want to join the game." ]
                 , div
                     [ class "game-code round-colored-container" ]
@@ -144,13 +145,10 @@ lobby gameCode playerName nameInputValue =
                 [ class "col-md-3" ]
                 [ h2
                     []
-                    [ text "The Team" ]
+                    [ text "Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
-                    [ playerStatus { name = playerName, isUser = True }
-                    , playerStatus { name = "MadMax15234", isUser = False }
-                    , playerStatus { name = "Popotin", isUser = False }
-                    ]
+                    (List.map playerStatus players)
                 ]
             ]
         ]
@@ -243,7 +241,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation (lobby gameCode model.name model.nameInput)
+            withNavigation (lobby gameCode model.name model.nameInput model.players)
 
         Types.JoinRoute ->
             withNavigation (join model.gameCodeInput)

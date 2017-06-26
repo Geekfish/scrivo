@@ -1,6 +1,15 @@
 module Types exposing (..)
 
+import Json.Encode
 import Phoenix.Socket
+import Phoenix.Presence
+    exposing
+        ( PresenceState
+        , syncState
+        , syncDiff
+        , presenceStateDecoder
+        , presenceDiffDecoder
+        )
 import Navigation exposing (Location)
 
 
@@ -16,10 +25,12 @@ type alias Model =
     , gameCode : String
     , gameCodeInput : String
     , nameInput : String
+    , players : List Player
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
     , socket : Phoenix.Socket.Socket Msg
+    , presences : PresenceState Player
     }
 
 
@@ -35,6 +46,8 @@ type alias Game =
 type alias Player =
     { name : String
     , isUser : Bool
+    , ref : String
+    , online_at : String
     }
 
 
@@ -67,3 +80,5 @@ type
       --
       -- Sockets
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
+    | HandlePresenceState Json.Encode.Value
+    | HandlePresenceDiff Json.Encode.Value

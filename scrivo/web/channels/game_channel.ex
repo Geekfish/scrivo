@@ -1,6 +1,7 @@
 defmodule Scrivo.GameChannel do
   use Scrivo.Web, :channel
 
+  alias Scrivo.Presence
   alias Scrivo.GameServer
   alias Scrivo.GameCodeGenerator
 
@@ -14,7 +15,16 @@ defmodule Scrivo.GameChannel do
   def join("game:" <> game_code, _params, socket) do
       Logger.debug "Joined game " <> game_code
       game = GameServer.get(game_code) |> tl
+      send(self(), :presence_update)
       {:ok, game, socket}
+  end
+
+  def handle_info(:presence_update, socket) do
+    push socket, "presence_state", Presence.list(socket)
+    {:ok, _} = Presence.track(socket, socket.assigns.user_id, %{
+      online_at: inspect(System.system_time(:seconds))
+    })
+    {:noreply, socket}
   end
 
   def handle_in("new:game", _params, socket) do

@@ -1,8 +1,18 @@
 module State exposing (..)
 
+import Dict
 import Phoenix.Socket
 import Phoenix.Channel
 import Phoenix.Push
+import Phoenix.Presence
+    exposing
+        ( PresenceState
+        , syncState
+        , syncDiff
+        , presenceStateDecoder
+        , presenceDiffDecoder
+        , list
+        )
 import Json.Encode
 import Json.Decode
 import Json.Decode exposing (int, string, float, bool, Decoder)
@@ -25,12 +35,14 @@ initialModel =
     , gameCode = ""
     , gameCodeInput = ""
     , nameInput = ""
+    , players = []
     , alertMessage = Nothing
     , history = []
     , route = Types.HomeRoute
     , socket =
         Phoenix.Socket.init "ws://localhost:4000/socket/websocket"
             |> Phoenix.Socket.withDebug
+    , presences = Dict.empty
     }
 
 
@@ -42,10 +54,19 @@ modelFromLocation location model =
     }
 
 
-gameDecoder : Json.Decode.Decoder Types.Game
+gameDecoder : Decoder Types.Game
 gameDecoder =
-    Json.Decode.map Types.Game
-        (Json.Decode.field "game_code" Json.Decode.string)
+    decode Types.Game
+        |> required "game_code" string
+
+
+playerDecoder : Decoder Types.Player
+playerDecoder =
+    decode Types.Player
+        |> optional "name" string "Anonymous"
+        |> optional "isUser" bool False
+        |> optional "phx_ref" string ""
+        |> optional "online_at" string ""
 
 
 handleNewGameRequest : Json.Encode.Value -> Msg
@@ -56,13 +77,6 @@ handleNewGameRequest value =
 
         Err error ->
             Types.SetGameState Types.HomeRoute
-
-
-playerDecoder : Decoder Types.Player
-playerDecoder =
-    decode Types.Player
-        |> required "name" string
-        |> optional "isUser" bool False
 
 
 handlePlayerRegistration : Json.Encode.Value -> Msg
@@ -95,11 +109,18 @@ handleRouting model =
     case model.route of
         Types.LobbyRoute gameCode ->
             let
+                channelName =
+                    getGameChannel gameCode
+
                 channel =
-                    Phoenix.Channel.init <| getGameChannel gameCode
+                    Phoenix.Channel.init <| channelName
 
                 ( socket, cmd ) =
-                    Phoenix.Socket.join channel model.socket
+                    Phoenix.Socket.join channel
+                        (model.socket
+                            |> Phoenix.Socket.on "presence_state" channelName Types.HandlePresenceState
+                            |> Phoenix.Socket.on "presence_diff" channelName Types.HandlePresenceDiff
+                        )
             in
                 ( { model | socket = socket, gameCode = gameCode }
                 , Cmd.batch
@@ -111,6 +132,34 @@ handleRouting model =
 
         _ ->
             model ! []
+
+
+playersFromPresences : PresenceState Player -> List Types.Player
+playersFromPresences newPresenceState =
+    -- I don't know if there's another way other than this crazy function.
+    -- The presence helper should just let me have the deserialized presence.
+    -- But nope... having multiple "metas" complicates things further :(
+    -- Right now this is the structure we need to convert into Players:
+    -- OR maybe we shouldn't and the server should take care of sending
+    -- an updated players list, rather than just using "Presence"
+    --
+    -- presences : {
+    --  "ASDASDADSASDA" : {
+    --    metas : [ payload: {
+    --          , isUser = False
+    --          , name = "Anonymous"
+    --          , ...
+    --          }
+    --    , phx_ref = "1BFfJ0KgU90="
+    --    ]
+    --   }
+    -- }
+    newPresenceState
+        |> Dict.values
+        |> List.map .metas
+        |> List.map List.head
+        |> List.filterMap identity
+        |> List.map .payload
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -211,6 +260,44 @@ update msg model =
                 ( { model | socket = socket }
                 , Cmd.map Types.PhoenixMsg cmd
                 )
+
+        Types.HandlePresenceState raw ->
+            case Json.Decode.decodeValue (presenceStateDecoder playerDecoder) raw of
+                Ok presenceState ->
+                    let
+                        newPresenceState =
+                            model.presences |> syncState presenceState
+
+                        players =
+                            playersFromPresences newPresenceState
+                    in
+                        { model | players = players, presences = newPresenceState } ! []
+
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Error" error
+                    in
+                        model ! []
+
+        Types.HandlePresenceDiff raw ->
+            case Json.Decode.decodeValue (presenceDiffDecoder playerDecoder) raw of
+                Ok presenceDiff ->
+                    let
+                        newPresenceState =
+                            model.presences |> syncDiff presenceDiff
+
+                        players =
+                            playersFromPresences newPresenceState
+                    in
+                        { model | players = players, presences = newPresenceState } ! []
+
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Error" error
+                    in
+                        model ! []
 
 
 subscriptions : Model -> Sub Msg
