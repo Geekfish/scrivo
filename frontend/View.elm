@@ -50,7 +50,7 @@ initial model =
                 [ div
                     [ class "col-md-6" ]
                     [ a
-                        [ class "btn btn-primary btn-lg"
+                        [ class "btn btn-primary btn-lg btn-block"
                         , onClick Types.TriggerNewGame
                         , attribute "role" "button"
                         ]
@@ -59,7 +59,7 @@ initial model =
                 , div
                     [ class "col-md-6" ]
                     [ a
-                        [ class "btn btn-default btn-lg"
+                        [ class "btn btn-default btn-lg btn-block"
                         , href "#join"
                         , attribute "role" "button"
                         ]
