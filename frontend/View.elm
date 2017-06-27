@@ -148,17 +148,18 @@ lobby model =
                     [ text "Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
-                    (Dict.values model.players
-                        |> List.map (\player -> (playerStatus player (player.ref == model.playerRef)))
-                    )
+                    (Dict.values model.players |> List.map (playerStatus model.playerRef))
                 ]
             ]
         ]
 
 
-playerStatus : Player -> Bool -> Html Msg
-playerStatus player isCurrent =
+playerStatus : String -> Player -> Html Msg
+playerStatus currentRef player =
     let
+        isCurrent =
+            player.ref == currentRef
+
         ( icon, nickname ) =
             case player.name of
                 "" ->
