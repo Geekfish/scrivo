@@ -1,5 +1,6 @@
 module View exposing (..)
 
+import Dict
 import Html exposing (..)
 import Html.Attributes
     exposing
@@ -123,8 +124,8 @@ playerNameSection playerName inputValue =
             []
 
 
-lobby : Types.GameCode -> String -> String -> List Types.Player -> Html Msg
-lobby gameCode playerName nameInputValue players =
+lobby : Model -> Html Msg
+lobby model =
     div
         [ class "container-fluid main-content" ]
         [ div
@@ -135,10 +136,10 @@ lobby gameCode playerName nameInputValue players =
                 , p [] [ text "Share this code with others who want to join the game." ]
                 , div
                     [ class "game-code round-colored-container" ]
-                    [ text gameCode ]
+                    [ text model.gameCode ]
                 , div
                     []
-                    (playerNameSection playerName nameInputValue)
+                    (playerNameSection model.name model.nameInput)
                 ]
             , div
                 [ class "col-md-3" ]
@@ -147,7 +148,7 @@ lobby gameCode playerName nameInputValue players =
                     [ text "Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
-                    (List.map playerStatus players)
+                    (List.map playerStatus (Dict.values model.players))
                 ]
             ]
         ]
@@ -240,7 +241,7 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation (lobby gameCode model.name model.nameInput model.players)
+            withNavigation (lobby model)
 
         Types.JoinRoute ->
             withNavigation (join model.gameCodeInput)

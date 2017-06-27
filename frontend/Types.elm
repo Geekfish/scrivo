@@ -1,5 +1,6 @@
 module Types exposing (..)
 
+import Dict exposing (Dict)
 import Json.Encode
 import Phoenix.Socket
 import Phoenix.Presence
@@ -26,7 +27,7 @@ type alias Model =
     , gameCodeInput : String
     , nameInput : String
     , playerRef : String
-    , players : List Player
+    , players : Dict String Player
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
@@ -68,7 +69,7 @@ type
       --
       -- Game Events
     | JoinGame GameCode
-    | UpdatePlayerName String
+    | UpdatePlayer Player
       --
       -- Form Submission
     | SubmitGameCode
@@ -86,3 +87,4 @@ type
     | PhoenixMsg (Phoenix.Socket.Msg Msg)
     | HandlePresenceState Json.Encode.Value
     | HandlePresenceDiff Json.Encode.Value
+    | HandlePlayerUpdate Json.Encode.Value

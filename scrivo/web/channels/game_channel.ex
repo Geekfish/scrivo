@@ -8,7 +8,8 @@ defmodule Scrivo.GameChannel do
 
   def join("game:main", _params, socket) do
     Logger.debug "Joined main lobby!"
-    {:ok, socket}
+    player = Player.create(socket.assigns.user_ref)
+    {:ok, player, socket}
   end
 
   def join("game:" <> game_code, _params, socket) do
@@ -19,19 +20,20 @@ defmodule Scrivo.GameChannel do
     GameServer.add_player game_code, player
     game = GameServer.get(game_code) |> tl
 
-    send self(), :presence_update
-    broadcast! socket, "player:update", player
+    send self(), {:presence_update, player}
 
-    {:ok, %{game: game, player: player}, socket}
+    {:ok, game, socket}
   end
 
 
-  def handle_info(:presence_update, socket) do
+  def handle_info({:presence_update, player}, socket) do
     push socket, "presence_state", Presence.list(socket)
     {:ok, _} =
       Presence.track(
         socket, socket.assigns.user_ref,
-        %{online_at: inspect(System.system_time(:seconds))})
+        %{online_at: inspect(System.system_time(:seconds)), ref: player.ref})
+
+    broadcast! socket, "player:update", player
 
     {:noreply, socket}
   end

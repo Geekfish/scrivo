@@ -1,6 +1,6 @@
 module State exposing (..)
 
-import Dict
+import Dict exposing (Dict)
 import Phoenix.Socket
 import Phoenix.Channel
 import Phoenix.Push
@@ -38,7 +38,7 @@ initialModel =
     , gameCodeInput = ""
     , nameInput = ""
     , playerRef = ""
-    , players = []
+    , players = Dict.empty
     , alertMessage = Nothing
     , history = []
     , route = Types.HomeRoute
@@ -66,8 +66,8 @@ gameDecoder =
 playerDecoder : Decoder Player
 playerDecoder =
     decode Types.Player
-        |> optional "name" string "Anonymous"
         |> required "ref" string
+        |> optional "name" string "Anonymous"
 
 
 presenceDecoder : Decoder Presence
@@ -87,11 +87,11 @@ handleNewGameRequest value =
             Types.SetGameState Types.HomeRoute
 
 
-handlePlayerRegistration : Json.Encode.Value -> Msg
-handlePlayerRegistration value =
+handleCurrentPlayerUpdate : Json.Encode.Value -> Msg
+handleCurrentPlayerUpdate value =
     case Json.Decode.decodeValue playerDecoder value of
         Ok player ->
-            Types.UpdatePlayerName player.name
+            Types.UpdatePlayer player
 
         Err error ->
             Types.SetGameState Types.HomeRoute
@@ -121,13 +121,14 @@ handleRouting model =
                     getGameChannel gameCode
 
                 channel =
-                    Phoenix.Channel.init <| channelName
+                    Phoenix.Channel.init channelName
 
                 ( socket, cmd ) =
                     Phoenix.Socket.join channel
                         (model.socket
                             |> Phoenix.Socket.on "presence_state" channelName Types.HandlePresenceState
                             |> Phoenix.Socket.on "presence_diff" channelName Types.HandlePresenceDiff
+                            |> Phoenix.Socket.on "player:update" channelName Types.HandlePlayerUpdate
                         )
             in
                 ( { model | socket = socket, gameCode = gameCode }
@@ -196,8 +197,8 @@ update msg model =
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
-        Types.UpdatePlayerName playerName ->
-            { model | name = playerName } ! []
+        Types.UpdatePlayer player ->
+            { model | name = player.name, playerRef = player.ref } ! []
 
         --
         -- Form Submission
@@ -210,9 +211,9 @@ update msg model =
             let
                 push =
                     getGameChannel model.gameCode
-                        |> Phoenix.Push.init "player:player"
+                        |> Phoenix.Push.init "player:update"
                         |> Phoenix.Push.withPayload (registerPlayerParams model.nameInput)
-                        |> Phoenix.Push.onOk handlePlayerRegistration
+                        |> Phoenix.Push.onOk handleCurrentPlayerUpdate
 
                 ( socket, cmd ) =
                     Phoenix.Socket.push push model.socket
@@ -290,6 +291,22 @@ update msg model =
                     in
                         model ! []
 
+        Types.HandlePlayerUpdate raw ->
+            case Json.Decode.decodeValue playerDecoder raw of
+                Ok player ->
+                    let
+                        newPlayers =
+                            Dict.update player.ref (\_ -> Just player) model.players
+                    in
+                        { model | players = newPlayers } ! []
+
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Error" error
+                    in
+                        model ! []
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
@@ -301,6 +318,7 @@ joinMainLobby model =
     let
         channel =
             Phoenix.Channel.init "game:main"
+                |> Phoenix.Channel.onJoin handleCurrentPlayerUpdate
 
         ( socket, cmd ) =
             Phoenix.Socket.join channel model.socket
