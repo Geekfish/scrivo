@@ -35,6 +35,7 @@ defmodule Scrivo.Mixfile do
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
+     {:uuid, "~> 1.1"},
      {:exfmt, "~>0.2.2"}]
   end
 end

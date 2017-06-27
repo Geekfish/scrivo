@@ -25,12 +25,13 @@ type alias Model =
     , gameCode : String
     , gameCodeInput : String
     , nameInput : String
+    , playerRef : String
     , players : List Player
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
     , socket : Phoenix.Socket.Socket Msg
-    , presences : PresenceState Player
+    , presences : PresenceState Presence
     }
 
 
@@ -43,11 +44,15 @@ type alias Game =
     }
 
 
-type alias Player =
-    { name : String
-    , isUser : Bool
-    , ref : String
+type alias Presence =
+    { ref : String
     , online_at : String
+    }
+
+
+type alias Player =
+    { ref : String
+    , name : String
     }
 
 
@@ -63,7 +68,6 @@ type
       --
       -- Game Events
     | JoinGame GameCode
-    | RegisterPlayerName String
     | UpdatePlayerName String
       --
       -- Form Submission

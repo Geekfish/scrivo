@@ -23,7 +23,9 @@ import Routing exposing (parseLocation)
 import Types
     exposing
         ( Msg
+        , Game
         , Player
+        , Presence
         , Model
         , Route
         )
@@ -35,6 +37,7 @@ initialModel =
     , gameCode = ""
     , gameCodeInput = ""
     , nameInput = ""
+    , playerRef = ""
     , players = []
     , alertMessage = Nothing
     , history = []
@@ -54,19 +57,24 @@ modelFromLocation location model =
     }
 
 
-gameDecoder : Decoder Types.Game
+gameDecoder : Decoder Game
 gameDecoder =
     decode Types.Game
         |> required "game_code" string
 
 
-playerDecoder : Decoder Types.Player
+playerDecoder : Decoder Player
 playerDecoder =
     decode Types.Player
         |> optional "name" string "Anonymous"
-        |> optional "isUser" bool False
-        |> optional "phx_ref" string ""
-        |> optional "online_at" string ""
+        |> required "ref" string
+
+
+presenceDecoder : Decoder Presence
+presenceDecoder =
+    decode Types.Presence
+        |> required "ref" string
+        |> required "online_at" string
 
 
 handleNewGameRequest : Json.Encode.Value -> Msg
@@ -134,32 +142,26 @@ handleRouting model =
             model ! []
 
 
-playersFromPresences : PresenceState Player -> List Types.Player
-playersFromPresences newPresenceState =
-    -- I don't know if there's another way other than this crazy function.
-    -- The presence helper should just let me have the deserialized presence.
-    -- But nope... having multiple "metas" complicates things further :(
-    -- Right now this is the structure we need to convert into Players:
-    -- OR maybe we shouldn't and the server should take care of sending
-    -- an updated players list, rather than just using "Presence"
-    --
-    -- presences : {
-    --  "ASDASDADSASDA" : {
-    --    metas : [ payload: {
-    --          , isUser = False
-    --          , name = "Anonymous"
-    --          , ...
-    --          }
-    --    , phx_ref = "1BFfJ0KgU90="
-    --    ]
-    --   }
-    -- }
-    newPresenceState
-        |> Dict.values
-        |> List.map .metas
-        |> List.map List.head
-        |> List.filterMap identity
-        |> List.map .payload
+
+-- playersFromPresences : PresenceState Player -> List Types.Player
+-- playersFromPresences newPresenceState =
+--     -- I don't know if there's another way other than this crazy function.
+--     --
+--     -- presences : {
+--     --  "ASDASDADSASDA" : {
+--     --    metas : [ payload: {
+--     --          , name = "Anonymous"
+--     --          , ref = "ASDASDADSASDA"
+--     --          , ...
+--     --          }
+--     --    , phx_ref = "1BFfJ0KgU90="
+--     --    ]
+--     --   }
+--     -- }
+--     newPresenceState
+--         |> Dict.values
+--         |> List.map (.metas >> List.head >> Maybe.map .payload)
+--         |> List.filterMap identity
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -194,21 +196,6 @@ update msg model =
                 (Types.SetGameState (Types.LobbyRoute gameCode))
                 model
 
-        Types.RegisterPlayerName playerName ->
-            let
-                push =
-                    getGameChannel model.gameCode
-                        |> Phoenix.Push.init "new:player"
-                        |> Phoenix.Push.withPayload (registerPlayerParams playerName)
-                        |> Phoenix.Push.onOk handlePlayerRegistration
-
-                ( socket, cmd ) =
-                    Phoenix.Socket.push push model.socket
-            in
-                ( { model | socket = socket }
-                , Cmd.map Types.PhoenixMsg cmd
-                )
-
         Types.UpdatePlayerName playerName ->
             { model | name = playerName } ! []
 
@@ -220,9 +207,19 @@ update msg model =
                 model
 
         Types.SubmitName ->
-            update
-                (Types.RegisterPlayerName model.nameInput)
-                model
+            let
+                push =
+                    getGameChannel model.gameCode
+                        |> Phoenix.Push.init "player:player"
+                        |> Phoenix.Push.withPayload (registerPlayerParams model.nameInput)
+                        |> Phoenix.Push.onOk handlePlayerRegistration
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
 
         --
         -- Input Handling
@@ -262,16 +259,13 @@ update msg model =
                 )
 
         Types.HandlePresenceState raw ->
-            case Json.Decode.decodeValue (presenceStateDecoder playerDecoder) raw of
+            case Json.Decode.decodeValue (presenceStateDecoder presenceDecoder) raw of
                 Ok presenceState ->
                     let
                         newPresenceState =
                             model.presences |> syncState presenceState
-
-                        players =
-                            playersFromPresences newPresenceState
                     in
-                        { model | players = players, presences = newPresenceState } ! []
+                        { model | presences = newPresenceState } ! []
 
                 Err error ->
                     let
@@ -281,16 +275,13 @@ update msg model =
                         model ! []
 
         Types.HandlePresenceDiff raw ->
-            case Json.Decode.decodeValue (presenceDiffDecoder playerDecoder) raw of
+            case Json.Decode.decodeValue (presenceDiffDecoder presenceDecoder) raw of
                 Ok presenceDiff ->
                     let
                         newPresenceState =
                             model.presences |> syncDiff presenceDiff
-
-                        players =
-                            playersFromPresences newPresenceState
                     in
-                        { model | players = players, presences = newPresenceState } ! []
+                        { model | presences = newPresenceState } ! []
 
                 Err error ->
                     let

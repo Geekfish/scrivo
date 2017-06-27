@@ -27,26 +27,38 @@ defmodule Scrivo.GameServer do
       GenServer.call(__MODULE__, {:get, game_code})
   end
 
-  def register_player(game_code, player_name) do
-      Logger.debug "Register player"
-      GenServer.call(__MODULE__, {:register_player, game_code, player_name})
+  def update_name(game_code, player_name) do
+      Logger.debug "Update player name"
+      GenServer.call(__MODULE__, {:update_name, game_code, player_name})
+  end
+
+  def add_player(game_code, player) do
+      Logger.debug "Add player"
+      GenServer.call(__MODULE__, {:add_player, game_code, player})
   end
 
   ## GenServer
   def handle_call({:create_or_update, game_code}, _from, _state) do
       Logger.debug "GenServer handling: Create or update game"
-      {:reply, :ok, :ets.insert(:games, {game_code, {}})}
+      {:reply, :ok, :ets.insert(:games, {game_code, %{}})}
   end
   def handle_call({:get, game_code}, _from, state) do
       Logger.debug "GenServer handling: Lookup game"
       {:reply, :ets.lookup(:games, game_code), state}
   end
-  def handle_call({:register_player, game_code, player_name}, _from, _state) do
-      Logger.debug "GenServer handling: Create or update game"
+  def handle_call({:update_name, game_code, ref, name}, _from, _state) do
+      Logger.debug "GenServer handling: Update player name"
       [{game_code, players}] = :ets.lookup(:games, game_code)
-      players = Tuple.append(players, player_name)
+      players = put_in players[ref].name, name
       :ets.insert(:games, {game_code, players})
-      {:reply, :ok, %{"name": player_name}}
+      {:reply, :ok, players[ref]}
+  end
+  def handle_call({:add_player, game_code, player}, _from, _state) do
+      Logger.debug "GenServer handling: add player"
+      [{game_code, players}] = :ets.lookup(:games, game_code)
+      players = Map.put_new players, player.ref, player
+      :ets.insert(:games, {game_code, players})
+      {:reply, :ok, player}
   end
 
   def handle_info(_msg, state) do

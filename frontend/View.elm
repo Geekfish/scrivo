@@ -1,6 +1,5 @@
 module View exposing (..)
 
-import Dict
 import Html exposing (..)
 import Html.Attributes
     exposing
@@ -172,7 +171,7 @@ playerStatus player =
                 []
             , span
                 [ class "nickname" ]
-                [ if player.isUser && player.name /= "" then
+                [ if False && player.name /= "" then
                     strong
                         []
                         [ a
