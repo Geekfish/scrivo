@@ -27,9 +27,9 @@ defmodule Scrivo.GameServer do
       GenServer.call(__MODULE__, {:get, game_code})
   end
 
-  def update_name(game_code, player_name) do
+  def update_name(game_code, ref, player_name) do
       Logger.debug "Update player name"
-      GenServer.call(__MODULE__, {:update_name, game_code, player_name})
+      GenServer.call(__MODULE__, {:update_name, game_code, ref, player_name})
   end
 
   def add_player(game_code, player) do
@@ -46,12 +46,12 @@ defmodule Scrivo.GameServer do
       Logger.debug "GenServer handling: Lookup game"
       {:reply, :ets.lookup(:games, game_code), state}
   end
-  def handle_call({:update_name, game_code, ref, name}, _from, _state) do
+  def handle_call({:update_name, game_code, ref, name}, _from, state) do
       Logger.debug "GenServer handling: Update player name"
       [{game_code, players}] = :ets.lookup(:games, game_code)
       players = put_in players[ref].name, name
       :ets.insert(:games, {game_code, players})
-      {:reply, :ok, players[ref]}
+      {:reply, {:ok, players[ref]}, state}
   end
   def handle_call({:add_player, game_code, player}, _from, _state) do
       Logger.debug "GenServer handling: add player"

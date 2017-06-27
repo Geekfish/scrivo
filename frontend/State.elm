@@ -67,7 +67,7 @@ playerDecoder : Decoder Player
 playerDecoder =
     decode Types.Player
         |> required "ref" string
-        |> optional "name" string "Anonymous"
+        |> optional "name" string ""
 
 
 presenceDecoder : Decoder Presence
