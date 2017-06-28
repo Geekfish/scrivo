@@ -32,6 +32,10 @@ p {
     font-size: 1.5em;
 }
 
+[hidden] {
+   display: none !important;
+ }
+
 .btn.btn-group-justified {
     margin-top: 8px;
 }
@@ -135,6 +139,10 @@ p {
 .players-list li {
     padding-bottom: 10px;
     padding-left: 10px;
+}
+
+.start-game {
+    padding-top: 20px;
 }
 
 .glyphicon-ok {

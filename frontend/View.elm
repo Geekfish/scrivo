@@ -24,7 +24,7 @@ import Html.Events
         , onSubmit
         , onDoubleClick
         )
-import Player exposing (playersOnline)
+import Player exposing (playersOnline, isReady, minNumPlayersReady)
 import Types
     exposing
         ( Msg
@@ -126,32 +126,46 @@ playerNameSection playerName inputValue =
 
 lobby : Model -> Html Msg
 lobby model =
-    div
-        [ class "container-fluid main-content" ]
-        [ div
-            [ class "row flex-row" ]
+    let
+        players =
+            playersOnline model
+    in
+        div
+            [ class "container-fluid main-content" ]
             [ div
-                [ class "col-md-3 col-md-offset-3" ]
-                [ h2 [] [ text "Game Code" ]
-                , p [] [ text "Share this code with others who want to join the game." ]
+                [ class "row flex-row" ]
+                [ div
+                    [ class "col-md-3 col-md-offset-3" ]
+                    [ h2 [] [ text "Game Code" ]
+                    , p [] [ text "Share this code with others who want to join the game." ]
+                    , div
+                        [ class "game-code round-colored-container" ]
+                        [ text model.gameCode ]
+                    , div
+                        []
+                        (playerNameSection model.name model.nameInput)
+                    ]
                 , div
-                    [ class "game-code round-colored-container" ]
-                    [ text model.gameCode ]
+                    [ class "col-md-3" ]
+                    [ h2
+                        []
+                        [ text "Team" ]
+                    , ul
+                        [ class "players-list round-colored-container" ]
+                        (players |> List.map (playerStatus model.playerRef))
+                    ]
                 , div
-                    []
-                    (playerNameSection model.name model.nameInput)
-                ]
-            , div
-                [ class "col-md-3" ]
-                [ h2
-                    []
-                    [ text "Team" ]
-                , ul
-                    [ class "players-list round-colored-container" ]
-                    (playersOnline model |> List.map (playerStatus model.playerRef))
+                    [ class "col-md-3 col-md-offset-4 start-game" ]
+                    [ if minNumPlayersReady players then
+                        (a
+                            [ class "btn btn-primary btn-lg btn-block" ]
+                            [ text "Start" ]
+                        )
+                      else
+                        (p [] [ text "Waiting for more players to get ready..." ])
+                    ]
                 ]
             ]
-        ]
 
 
 playerStatus : String -> Player -> Html Msg
@@ -161,12 +175,10 @@ playerStatus currentRef player =
             player.ref == currentRef
 
         ( icon, nickname ) =
-            case player.name of
-                "" ->
-                    ( "time", "Anonymous" )
-
-                _ ->
-                    ( "ok", player.name )
+            if isReady (player) then
+                ( "ok", player.name )
+            else
+                ( "time", "Anonymous" )
     in
         li
             []
@@ -175,7 +187,7 @@ playerStatus currentRef player =
                 []
             , span
                 [ class "nickname" ]
-                [ if isCurrent && player.name /= "" then
+                [ if isCurrent && isReady player then
                     strong
                         []
                         [ a
