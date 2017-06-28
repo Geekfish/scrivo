@@ -1,6 +1,5 @@
 module View exposing (..)
 
-import Dict
 import Html exposing (..)
 import Html.Attributes
     exposing
@@ -25,6 +24,7 @@ import Html.Events
         , onSubmit
         , onDoubleClick
         )
+import Player exposing (playersOnline)
 import Types
     exposing
         ( Msg
@@ -148,7 +148,7 @@ lobby model =
                     [ text "Team" ]
                 , ul
                     [ class "players-list round-colored-container" ]
-                    (Dict.values model.players |> List.map (playerStatus model.playerRef))
+                    (playersOnline model |> List.map (playerStatus model.playerRef))
                 ]
             ]
         ]

@@ -11,11 +11,10 @@ import Phoenix.Presence
         , syncDiff
         , presenceStateDecoder
         , presenceDiffDecoder
-        , list
         )
 import Json.Encode
 import Json.Decode
-import Json.Decode exposing (int, string, float, bool, Decoder)
+import Json.Decode exposing (int, string, float, bool, Decoder, list, dict)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Debug
 import Navigation
@@ -70,6 +69,13 @@ playerDecoder =
         |> optional "name" string ""
 
 
+gameAndPlayersDecoder : Decoder Types.GameAndPlayers
+gameAndPlayersDecoder =
+    decode Types.GameAndPlayers
+        |> required "game_code" string
+        |> required "players" (dict playerDecoder)
+
+
 presenceDecoder : Decoder Presence
 presenceDecoder =
     decode Types.Presence
@@ -122,6 +128,7 @@ handleRouting model =
 
                 channel =
                     Phoenix.Channel.init channelName
+                        |> Phoenix.Channel.onJoin Types.HandleGameJoin
 
                 ( socket, cmd ) =
                     Phoenix.Socket.join channel
@@ -141,28 +148,6 @@ handleRouting model =
 
         _ ->
             model ! []
-
-
-
--- playersFromPresences : PresenceState Player -> List Types.Player
--- playersFromPresences newPresenceState =
---     -- I don't know if there's another way other than this crazy function.
---     --
---     -- presences : {
---     --  "ASDASDADSASDA" : {
---     --    metas : [ payload: {
---     --          , name = "Anonymous"
---     --          , ref = "ASDASDADSASDA"
---     --          , ...
---     --          }
---     --    , phx_ref = "1BFfJ0KgU90="
---     --    ]
---     --   }
---     -- }
---     newPresenceState
---         |> Dict.values
---         |> List.map (.metas >> List.head >> Maybe.map .payload)
---         |> List.filterMap identity
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -299,6 +284,18 @@ update msg model =
                             Dict.update player.ref (\_ -> Just player) model.players
                     in
                         { model | players = newPlayers } ! []
+
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Error" error
+                    in
+                        model ! []
+
+        Types.HandleGameJoin raw ->
+            case Json.Decode.decodeValue gameAndPlayersDecoder raw of
+                Ok gameAndPlayers ->
+                    { model | players = gameAndPlayers.players } ! []
 
                 Err error ->
                     let

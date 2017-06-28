@@ -4,6 +4,7 @@ defmodule Scrivo.GameChannel do
   alias Scrivo.GameServer
   alias Scrivo.GameCodeGenerator
   alias Scrivo.Player
+  alias Scrivo.Game
   require Logger
 
   def join("game:main", _params, socket) do
@@ -16,9 +17,9 @@ defmodule Scrivo.GameChannel do
     Logger.debug "Joined game " <> game_code
 
     player = Player.create(socket.assigns.user_ref)
-
     GameServer.add_player game_code, player
-    game = GameServer.get(game_code) |> tl
+
+    game = GameServer.get(game_code) |> hd |> Game.from_enum
 
     send self(), {:presence_update, player}
 
@@ -41,9 +42,8 @@ defmodule Scrivo.GameChannel do
 
   def handle_in("new:game", _params, socket) do
     new_game_code = GameCodeGenerator.code_of_length(8)
-    GameServer.create_or_update new_game_code
-    game = %{game_code: new_game_code, players: %{}}
-
+    game = Game.create new_game_code
+    game |> Game.as_tuple |> GameServer.create_or_update
     {:reply, {:ok, game}, socket}
   end
 

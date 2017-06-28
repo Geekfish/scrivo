@@ -1,4 +1,5 @@
 defmodule Scrivo.Player do
+    @derive [Poison.Encoder]
     @enforce_keys [:ref]
     defstruct [:ref, :name]
 

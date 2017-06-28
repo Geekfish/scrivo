@@ -27,7 +27,7 @@ type alias Model =
     , gameCodeInput : String
     , nameInput : String
     , playerRef : String
-    , players : Dict String Player
+    , players : Players
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
@@ -40,6 +40,12 @@ type alias GameCode =
     String
 
 
+type alias GameAndPlayers =
+    { gameCode : GameCode
+    , players : Players
+    }
+
+
 type alias Game =
     { gameCode : GameCode
     }
@@ -49,6 +55,10 @@ type alias Presence =
     { ref : String
     , online_at : String
     }
+
+
+type alias Players =
+    Dict String Player
 
 
 type alias Player =
@@ -88,3 +98,4 @@ type
     | HandlePresenceState Json.Encode.Value
     | HandlePresenceDiff Json.Encode.Value
     | HandlePlayerUpdate Json.Encode.Value
+    | HandleGameJoin Json.Encode.Value

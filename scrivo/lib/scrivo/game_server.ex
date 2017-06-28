@@ -38,9 +38,9 @@ defmodule Scrivo.GameServer do
   end
 
   ## GenServer
-  def handle_call({:create_or_update, game_code}, _from, _state) do
+  def handle_call({:create_or_update, game}, _from, _state) do
       Logger.debug "GenServer handling: Create or update game"
-      {:reply, :ok, :ets.insert(:games, {game_code, %{}})}
+      {:reply, :ok, :ets.insert(:games, game)}
   end
   def handle_call({:get, game_code}, _from, state) do
       Logger.debug "GenServer handling: Lookup game"
