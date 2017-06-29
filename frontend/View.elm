@@ -246,6 +246,10 @@ join newGameInput =
         ]
 
 
+game =
+    div [] [ text "The game" ]
+
+
 withNavigation : Html Msg -> Html Msg
 withNavigation msg =
     -- Adds navigation to main app views

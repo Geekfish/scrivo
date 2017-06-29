@@ -99,3 +99,4 @@ type
     | HandlePresenceDiff Json.Encode.Value
     | HandlePlayerUpdate Json.Encode.Value
     | HandleGameJoin Json.Encode.Value
+    | HandleGameStart Json.Encode.Value

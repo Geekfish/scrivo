@@ -136,6 +136,7 @@ handleRouting model =
                             |> Phoenix.Socket.on "presence_state" channelName Types.HandlePresenceState
                             |> Phoenix.Socket.on "presence_diff" channelName Types.HandlePresenceDiff
                             |> Phoenix.Socket.on "player:update" channelName Types.HandlePlayerUpdate
+                            |> Phoenix.Socket.on "game:start" channelName Types.HandleGameStart
                         )
             in
                 ( { model | socket = socket, gameCode = gameCode }
@@ -303,6 +304,10 @@ update msg model =
                             Debug.log "Error" error
                     in
                         model ! []
+
+        Types.HandleGameStart raw ->
+            -- TODO:
+            model ! []
 
 
 subscriptions : Model -> Sub Msg
