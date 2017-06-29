@@ -19,7 +19,7 @@ defmodule Scrivo.GameChannel do
     player = Player.create(socket.assigns.user_ref)
     GameServer.add_player game_code, player
 
-    game = GameServer.get(game_code) |> hd |> Game.from_enum
+    game = GameServer.get(game_code) |> hd |> Game.from_tuple
 
     send self(), {:presence_update, player}
 

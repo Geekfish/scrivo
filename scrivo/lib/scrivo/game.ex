@@ -11,7 +11,7 @@ defmodule Scrivo.Game do
         {game.game_code, game.players}
     end
 
-    def from_enum({game_code, players}) do
+    def from_tuple({game_code, players}) do
         %Scrivo.Game{game_code: game_code, players: players}
     end
 end
