@@ -40,14 +40,15 @@ type alias GameCode =
     String
 
 
-type alias GameAndPlayers =
+type alias Game =
     { gameCode : GameCode
-    , players : Players
+    , inProgress : Bool
     }
 
 
-type alias Game =
+type alias GameAndPlayers =
     { gameCode : GameCode
+    , players : Players
     }
 
 
@@ -73,6 +74,9 @@ type
     -- Navigation
     = UrlChange Navigation.Location
     | SetGameState Route
+      -- Alerts
+    | DisplayError String
+    | CloseAlert
       --
       -- Passive State Handling
     | JoinMainChannel
@@ -92,6 +96,7 @@ type
       -- Other UI Events
     | TriggerNewGame
     | DeleteName
+    | StartGame
       --
       -- Sockets
     | PhoenixMsg (Phoenix.Socket.Msg Msg)

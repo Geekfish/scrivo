@@ -41,30 +41,33 @@ isEmpty =
 
 initial : Model -> Html Msg
 initial model =
-    div [ class "container-fluid vertical-center" ]
-        [ div
-            [ class "start col-md-6 col-md-offset-3" ]
-            [ h1 [] [ text "Scrivo", sup [] [ text "beta" ] ]
-            , p [] [ text "Collaborative gaming meets writing improvisation" ]
-            , div
-                [ class "row" ]
-                [ div
-                    [ class "col-md-6" ]
-                    [ a
-                        [ class "btn btn-primary btn-lg btn-block"
-                        , onClick Types.TriggerNewGame
-                        , attribute "role" "button"
-                        ]
-                        [ text "New Game" ]
-                    ]
+    div []
+        [ alertBox model.alertMessage
+        , div [ class "container-fluid vertical-center" ]
+            [ div
+                [ class "start col-md-6 col-md-offset-3" ]
+                [ h1 [] [ text "Scrivo", sup [] [ text "beta" ] ]
+                , p [] [ text "Collaborative gaming meets writing improvisation" ]
                 , div
-                    [ class "col-md-6" ]
-                    [ a
-                        [ class "btn btn-default btn-lg btn-block"
-                        , href "#join"
-                        , attribute "role" "button"
+                    [ class "row" ]
+                    [ div
+                        [ class "col-md-6" ]
+                        [ a
+                            [ class "btn btn-primary btn-lg btn-block"
+                            , onClick Types.TriggerNewGame
+                            , attribute "role" "button"
+                            ]
+                            [ text "New Game" ]
                         ]
-                        [ text "Join Game" ]
+                    , div
+                        [ class "col-md-6" ]
+                        [ a
+                            [ class "btn btn-default btn-lg btn-block"
+                            , href "#join"
+                            , attribute "role" "button"
+                            ]
+                            [ text "Join Game" ]
+                        ]
                     ]
                 ]
             ]
@@ -158,7 +161,9 @@ lobby model =
                     [ class "col-md-3 col-md-offset-4 start-game" ]
                     [ if minNumPlayersReady players then
                         (a
-                            [ class "btn btn-primary btn-lg btn-block" ]
+                            [ class "btn btn-primary btn-lg btn-block"
+                            , onClick Types.StartGame
+                            ]
                             [ text "Start" ]
                         )
                       else
@@ -246,24 +251,47 @@ join newGameInput =
         ]
 
 
+game : Html msg
 game =
     div [] [ text "The game" ]
 
 
-withNavigation : Html Msg -> Html Msg
-withNavigation msg =
+alertBox : Maybe String -> Html Msg
+alertBox message =
+    case message of
+        Just message ->
+            div
+                [ class "alert alert-warning alert-dismissable" ]
+                [ a
+                    [ href "#"
+                    , class "close"
+                    , attribute "aria-label" "close"
+                    , onClick Types.CloseAlert
+                    ]
+                    [ text "×" ]
+                , strong
+                    []
+                    [ text message ]
+                ]
+
+        Nothing ->
+            text ""
+
+
+withNavigation : Maybe String -> Html Msg -> Html Msg
+withNavigation message msg =
     -- Adds navigation to main app views
-    div [] [ navigation, msg ]
+    div [] [ navigation, alertBox message, msg ]
 
 
 view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation (lobby model)
+            withNavigation model.alertMessage (lobby model)
 
         Types.JoinRoute ->
-            withNavigation (join model.gameCodeInput)
+            withNavigation model.alertMessage (join model.gameCodeInput)
 
         _ ->
             initial model

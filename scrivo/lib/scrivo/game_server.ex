@@ -2,6 +2,8 @@ defmodule Scrivo.GameServer do
   use GenServer
   require Logger
 
+  alias Scrivo.Game
+
   ## External API
   def start_link do
       Logger.debug "Link to ETS started"
@@ -17,9 +19,9 @@ defmodule Scrivo.GameServer do
       {:ok, :ets.new(:games, [:set, :public, :named_table])}
   end
 
-  def create_or_update(game) do
+  def create(game_code) do
       Logger.debug "Create or update game"
-      GenServer.call(__MODULE__, {:create_or_update, game})
+      GenServer.call(__MODULE__, {:create, game_code})
   end
 
   def get(game_code) do
@@ -37,28 +39,59 @@ defmodule Scrivo.GameServer do
       GenServer.call(__MODULE__, {:add_player, game_code, player})
   end
 
+  def start(game_code) do
+      Logger.debug "Starting game"
+      GenServer.call(__MODULE__, {:start, game_code})
+  end
+
   ## GenServer
-  def handle_call({:create_or_update, game}, _from, _state) do
+  defp fetch_game(game_code) do
+      :ets.lookup(:games, game_code) |> hd |> Game.from_tuple
+  end
+
+  defp store_game(game) do
+      :ets.insert(:games, Game.as_tuple game)
+  end
+
+  def handle_call({:create, game_code}, _from, state) do
       Logger.debug "GenServer handling: Create or update game"
-      {:reply, :ok, :ets.insert(:games, game)}
+      game = Game.create game_code
+      store_game game
+      {:reply, {:ok, game}, state}
   end
   def handle_call({:get, game_code}, _from, state) do
       Logger.debug "GenServer handling: Lookup game"
-      {:reply, :ets.lookup(:games, game_code), state}
+      {:reply, fetch_game(game_code), state}
   end
   def handle_call({:update_name, game_code, ref, name}, _from, state) do
       Logger.debug "GenServer handling: Update player name"
-      [{game_code, players}] = :ets.lookup(:games, game_code)
-      players = put_in players[ref].name, name
-      :ets.insert(:games, {game_code, players})
-      {:reply, {:ok, players[ref]}, state}
+      game =
+          game_code
+          |> fetch_game
+          |> Game.update_player_name(ref, name)
+
+      store_game game
+      {:reply, {:ok, game.players[ref]}, state}
   end
   def handle_call({:add_player, game_code, player}, _from, _state) do
       Logger.debug "GenServer handling: add player"
-      [{game_code, players}] = :ets.lookup(:games, game_code)
-      players = Map.put_new players, player.ref, player
-      :ets.insert(:games, {game_code, players})
+      game =
+          game_code
+          |> fetch_game
+          |> Game.add_player(player)
+
+      store_game game
       {:reply, :ok, player}
+  end
+  def handle_cast({:start, game_code}, _from, state) do
+      Logger.debug "GenServer handling: start game"
+      game =
+          game_code
+          |> fetch_game
+          |> Game.start
+
+      store_game game
+      {:reply, :ok, state}
   end
 
   def handle_info(_msg, state) do

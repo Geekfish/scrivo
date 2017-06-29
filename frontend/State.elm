@@ -60,6 +60,7 @@ gameDecoder : Decoder Game
 gameDecoder =
     decode Types.Game
         |> required "game_code" string
+        |> required "in_progress" bool
 
 
 playerDecoder : Decoder Player
@@ -90,7 +91,7 @@ handleNewGameRequest value =
             Types.JoinGame game.gameCode
 
         Err error ->
-            Types.SetGameState Types.HomeRoute
+            Types.DisplayError error
 
 
 handleCurrentPlayerUpdate : Json.Encode.Value -> Msg
@@ -100,7 +101,7 @@ handleCurrentPlayerUpdate value =
             Types.UpdatePlayer player
 
         Err error ->
-            Types.SetGameState Types.HomeRoute
+            Types.DisplayError error
 
 
 getGameChannel : String -> String
@@ -163,6 +164,14 @@ update msg model =
             handleRouting { model | route = route }
 
         --
+        -- Alerts
+        Types.DisplayError error ->
+            { model | alertMessage = Just error } ! []
+
+        Types.CloseAlert ->
+            { model | alertMessage = Nothing } ! []
+
+        --
         -- Passive State Handling
         Types.JoinMainChannel ->
             let
@@ -221,7 +230,7 @@ update msg model =
         Types.TriggerNewGame ->
             let
                 push =
-                    Phoenix.Push.init "new:game" mainChannel
+                    Phoenix.Push.init "game:new" mainChannel
                         |> Phoenix.Push.onOk handleNewGameRequest
 
                 ( socket, cmd ) =
@@ -233,6 +242,18 @@ update msg model =
 
         Types.DeleteName ->
             { model | name = "" } ! []
+
+        Types.StartGame ->
+            let
+                push =
+                    Phoenix.Push.init "game:start" mainChannel
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
 
         --
         -- Sockets
