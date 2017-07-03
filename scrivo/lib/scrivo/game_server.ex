@@ -83,7 +83,7 @@ defmodule Scrivo.GameServer do
       store_game game
       {:reply, :ok, player}
   end
-  def handle_cast({:start, game_code}, _from, state) do
+  def handle_call({:start, game_code}, _from, state) do
       Logger.debug "GenServer handling: start game"
       game =
           game_code
@@ -91,7 +91,7 @@ defmodule Scrivo.GameServer do
           |> Game.start
 
       store_game game
-      {:reply, :ok, state}
+      {:reply, {:ok, game}, state}
   end
 
   def handle_info(_msg, state) do

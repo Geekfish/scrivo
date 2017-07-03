@@ -38,6 +38,7 @@ initialModel =
     , nameInput = ""
     , playerRef = ""
     , players = Dict.empty
+    , inProgress = False
     , alertMessage = Nothing
     , history = []
     , route = Types.HomeRoute
@@ -86,6 +87,9 @@ presenceDecoder =
 
 handleNewGameRequest : Json.Encode.Value -> Msg
 handleNewGameRequest value =
+    -- Todo: this doesn't handle reseting game params.
+    -- We can probably move this handler to the update function so that
+    -- we have access to update the model.
     case Json.Decode.decodeValue gameDecoder value of
         Ok game ->
             Types.JoinGame game.gameCode
@@ -246,7 +250,8 @@ update msg model =
         Types.StartGame ->
             let
                 push =
-                    Phoenix.Push.init "game:start" mainChannel
+                    getGameChannel model.gameCode
+                        |> Phoenix.Push.init "game:start"
 
                 ( socket, cmd ) =
                     Phoenix.Socket.push push model.socket
@@ -327,8 +332,16 @@ update msg model =
                         model ! []
 
         Types.HandleGameStart raw ->
-            -- TODO:
-            model ! []
+            case Json.Decode.decodeValue gameDecoder raw of
+                Ok game ->
+                    { model | inProgress = game.inProgress } ! []
+
+                Err error ->
+                    let
+                        _ =
+                            Debug.log "Error" error
+                    in
+                        model ! []
 
 
 subscriptions : Model -> Sub Msg

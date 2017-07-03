@@ -48,7 +48,8 @@ defmodule Scrivo.GameChannel do
   def handle_in("game:start", _params, socket) do
     "game:" <> game_code = socket.topic
     {:ok, game} = GameServer.start(game_code)
-    {:reply, {:ok, game}, socket}
+    broadcast! socket, "game:start", game
+    {:reply, :ok, socket}
   end
 
   def handle_in("player:update", params, socket) do

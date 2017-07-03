@@ -28,6 +28,7 @@ type alias Model =
     , nameInput : String
     , playerRef : String
     , players : Players
+    , inProgress : Bool
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location

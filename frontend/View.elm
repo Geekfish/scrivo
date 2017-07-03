@@ -212,6 +212,18 @@ playerStatus currentRef player =
             ]
 
 
+gameInProgress model =
+    div
+        [ class "container-fluid main-content" ]
+        [ div
+            [ class "row flex-row" ]
+            [ div
+                [ class "col-md-2 col-md-offset-5" ]
+                [ h2 [ class "text-center" ] [ text "In progress" ] ]
+            ]
+        ]
+
+
 join : String -> Html Msg
 join newGameInput =
     div
@@ -288,7 +300,14 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Types.LobbyRoute gameCode ->
-            withNavigation model.alertMessage (lobby model)
+            let
+                gameView =
+                    if model.inProgress then
+                        gameInProgress
+                    else
+                        lobby
+            in
+                withNavigation model.alertMessage (gameView model)
 
         Types.JoinRoute ->
             withNavigation model.alertMessage (join model.gameCodeInput)

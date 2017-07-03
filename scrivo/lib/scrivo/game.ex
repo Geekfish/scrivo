@@ -29,7 +29,7 @@ defmodule Scrivo.Game do
 
     def start(game) do
       %Scrivo.Game{
-          game | in_progress: True
+          game | in_progress: true
       }
     end
 end
