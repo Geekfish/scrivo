@@ -32,6 +32,18 @@ p {
     font-size: 1.5em;
 }
 
+textarea {
+    color: #fff;
+    background-color: rgba(55, 55, 55, 0.25);
+    font-size: 1.5em;
+    min-height: 100px;
+    text-indent: 50px;
+}
+
+textarea::placeholder {
+    color: #bbb;
+}
+
 [hidden] {
    display: none !important;
  }

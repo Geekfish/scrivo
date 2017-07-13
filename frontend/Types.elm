@@ -26,6 +26,7 @@ type alias Model =
     , gameCode : String
     , gameCodeInput : String
     , nameInput : String
+    , textInput : String
     , playerRef : String
     , players : Players
     , inProgress : Bool
@@ -93,6 +94,7 @@ type
       -- Input Handling
     | UpdateInputGameCode GameCode
     | UpdateInputName String
+    | UpdateInputText String
       --
       -- Other UI Events
     | TriggerNewGame

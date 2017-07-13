@@ -36,6 +36,7 @@ initialModel =
     , gameCode = ""
     , gameCodeInput = ""
     , nameInput = ""
+    , textInput = ""
     , playerRef = ""
     , players = Dict.empty
     , inProgress = False
@@ -121,6 +122,11 @@ mainChannel =
 registerPlayerParams : String -> Json.Encode.Value
 registerPlayerParams name =
     Json.Encode.object [ ( "name", Json.Encode.string name ) ]
+
+
+registerTextInputParams : String -> Json.Encode.Value
+registerTextInputParams text =
+    Json.Encode.object [ ( "text", Json.Encode.string text ) ]
 
 
 handleRouting : Model -> ( Model, Cmd Msg )
@@ -228,6 +234,21 @@ update msg model =
 
         Types.UpdateInputName name ->
             { model | nameInput = name } ! []
+
+        Types.UpdateInputText text ->
+            let
+                -- TODO: Server-side!!!
+                push =
+                    getGameChannel model.gameCode
+                        |> Phoenix.Push.init "game:receive_input"
+                        |> Phoenix.Push.withPayload (registerTextInputParams text)
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket, textInput = text }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
 
         --
         -- UI Events

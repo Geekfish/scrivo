@@ -212,14 +212,31 @@ playerStatus currentRef player =
             ]
 
 
+gameInProgress : Model -> Html Msg
 gameInProgress model =
+    -- TODO:
+    -- Only display textarea to current player.
+    -- Keep track of current player / next players.
+    -- Post input to server and update view for other players.
     div
         [ class "container-fluid main-content" ]
         [ div
             [ class "row flex-row" ]
             [ div
                 [ class "col-md-2 col-md-offset-5" ]
-                [ h2 [ class "text-center" ] [ text "In progress" ] ]
+                -- TODO: input real random title
+                [ h2 [ class "text-center" ] [ text "Text title" ] ]
+            , div
+                [ class "col-md-6 col-md-offset-3" ]
+                [ textarea
+                    [ placeholder "Once upon a time..."
+                      -- TODO: This max length is not based on anything,
+                      -- find a more reasonable limit and display to user.
+                    , maxlength 400
+                    , onInput Types.UpdateInputText
+                    ]
+                    []
+                ]
             ]
         ]
 
