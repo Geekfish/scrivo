@@ -64,4 +64,11 @@ defmodule Scrivo.GameChannel do
 
     {:reply, {:ok, player}, socket}
   end
+
+  def handle_in("game:receive_input", params, socket) do
+    current_input = params["text_input"]
+    broadcast! socket, "game:receive_input", %{text_input: current_input}
+    {:noreply, socket}
+
+  end
 end

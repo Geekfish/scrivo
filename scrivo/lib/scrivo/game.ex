@@ -3,18 +3,18 @@ defmodule Scrivo.Game do
 
     @derive [Poison.Encoder]
     @enforce_keys [:game_code, :players]
-    defstruct [:game_code, :in_progress, :players]
+    defstruct [:game_code, :in_progress, :players, :current_player]
 
     def as_tuple(game) do
-        {game.game_code, game.in_progress, game.players}
+        {game.game_code, game.in_progress, game.players, game.current_player}
     end
 
-    def from_tuple({game_code, in_progress, players}) do
-        %Scrivo.Game{game_code: game_code, in_progress: in_progress, players: players}
+    def from_tuple({game_code, in_progress, players, current_player}) do
+        %Scrivo.Game{game_code: game_code, in_progress: in_progress, players: players, current_player: current_player}
     end
 
     def create(game_code) do
-        %Scrivo.Game{game_code: game_code, in_progress: false, players: %{}}
+        %Scrivo.Game{game_code: game_code, in_progress: false, players: %{}, current_player: nil}
     end
 
     def add_player(game, player) do
@@ -28,8 +28,10 @@ defmodule Scrivo.Game do
     end
 
     def start(game) do
+      current_player = game.players |> Map.keys |> Enum.random
       %Scrivo.Game{
-          game | in_progress: true
+          game | in_progress: true,
+                 current_player: current_player
       }
     end
 end

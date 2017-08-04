@@ -30,6 +30,7 @@ type alias Model =
     , playerRef : String
     , players : Players
     , inProgress : Bool
+    , currentPlayer : Maybe String
     , alertMessage : Maybe String
     , route : Route
     , history : List Navigation.Location
@@ -42,9 +43,15 @@ type alias GameCode =
     String
 
 
+type alias CurrentPlayerState =
+    { textInput : String
+    }
+
+
 type alias Game =
     { gameCode : GameCode
     , inProgress : Bool
+    , currentPlayer : Maybe String
     }
 
 
@@ -108,3 +115,4 @@ type
     | HandlePlayerUpdate Json.Encode.Value
     | HandleGameJoin Json.Encode.Value
     | HandleGameStart Json.Encode.Value
+    | HandleTextInputUpdate Json.Encode.Value

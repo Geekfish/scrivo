@@ -40,6 +40,7 @@ initialModel =
     , playerRef = ""
     , players = Dict.empty
     , inProgress = False
+    , currentPlayer = Nothing
     , alertMessage = Nothing
     , history = []
     , route = Types.HomeRoute
@@ -58,11 +59,18 @@ modelFromLocation location model =
     }
 
 
+currentPlayerStateDecoder : Decoder Types.CurrentPlayerState
+currentPlayerStateDecoder =
+    decode Types.CurrentPlayerState
+        |> required "text_input" string
+
+
 gameDecoder : Decoder Game
 gameDecoder =
-    decode Types.Game
+    decode Game
         |> required "game_code" string
         |> required "in_progress" bool
+        |> optional "current_player" (Json.Decode.map Just string) Nothing
 
 
 playerDecoder : Decoder Player
@@ -126,7 +134,7 @@ registerPlayerParams name =
 
 registerTextInputParams : String -> Json.Encode.Value
 registerTextInputParams text =
-    Json.Encode.object [ ( "text", Json.Encode.string text ) ]
+    Json.Encode.object [ ( "text_input", Json.Encode.string text ) ]
 
 
 handleRouting : Model -> ( Model, Cmd Msg )
@@ -148,6 +156,7 @@ handleRouting model =
                             |> Phoenix.Socket.on "presence_diff" channelName Types.HandlePresenceDiff
                             |> Phoenix.Socket.on "player:update" channelName Types.HandlePlayerUpdate
                             |> Phoenix.Socket.on "game:start" channelName Types.HandleGameStart
+                            |> Phoenix.Socket.on "game:receive_input" channelName Types.HandleTextInputUpdate
                         )
             in
                 ( { model | socket = socket, gameCode = gameCode }
@@ -160,6 +169,15 @@ handleRouting model =
 
         _ ->
             model ! []
+
+
+handleDecoderError : String -> Model -> ( Model, Cmd Msg )
+handleDecoderError error model =
+    let
+        _ =
+            Debug.log "Error" error
+    in
+        model ! []
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -237,7 +255,6 @@ update msg model =
 
         Types.UpdateInputText text ->
             let
-                -- TODO: Server-side!!!
                 push =
                     getGameChannel model.gameCode
                         |> Phoenix.Push.init "game:receive_input"
@@ -302,11 +319,7 @@ update msg model =
                         { model | presences = newPresenceState } ! []
 
                 Err error ->
-                    let
-                        _ =
-                            Debug.log "Error" error
-                    in
-                        model ! []
+                    handleDecoderError error model
 
         Types.HandlePresenceDiff raw ->
             case Json.Decode.decodeValue (presenceDiffDecoder presenceDecoder) raw of
@@ -318,11 +331,7 @@ update msg model =
                         { model | presences = newPresenceState } ! []
 
                 Err error ->
-                    let
-                        _ =
-                            Debug.log "Error" error
-                    in
-                        model ! []
+                    handleDecoderError error model
 
         Types.HandlePlayerUpdate raw ->
             case Json.Decode.decodeValue playerDecoder raw of
@@ -334,11 +343,7 @@ update msg model =
                         { model | players = newPlayers } ! []
 
                 Err error ->
-                    let
-                        _ =
-                            Debug.log "Error" error
-                    in
-                        model ! []
+                    handleDecoderError error model
 
         Types.HandleGameJoin raw ->
             case Json.Decode.decodeValue gameAndPlayersDecoder raw of
@@ -346,11 +351,7 @@ update msg model =
                     { model | players = gameAndPlayers.players } ! []
 
                 Err error ->
-                    let
-                        _ =
-                            Debug.log "Error" error
-                    in
-                        model ! []
+                    handleDecoderError error model
 
         Types.HandleGameStart raw ->
             case Json.Decode.decodeValue gameDecoder raw of
@@ -358,11 +359,15 @@ update msg model =
                     { model | inProgress = game.inProgress } ! []
 
                 Err error ->
-                    let
-                        _ =
-                            Debug.log "Error" error
-                    in
-                        model ! []
+                    handleDecoderError error model
+
+        Types.HandleTextInputUpdate raw ->
+            case Json.Decode.decodeValue currentPlayerStateDecoder raw of
+                Ok currentPlayerState ->
+                    { model | textInput = currentPlayerState.textInput } ! []
+
+                Err error ->
+                    handleDecoderError error model
 
 
 subscriptions : Model -> Sub Msg

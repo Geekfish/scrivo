@@ -227,9 +227,13 @@ gameInProgress model =
                 -- TODO: input real random title
                 [ h2 [ class "text-center" ] [ text "Text title" ] ]
             , div
+                [ class "col-md-6 col-md-offset-3 round-colored-container" ]
+                [ p [ class "idented blur" ] [ text model.textInput ] ]
+            , div
                 [ class "col-md-6 col-md-offset-3" ]
                 [ textarea
                     [ placeholder "Once upon a time..."
+                    , class "idented"
                       -- TODO: This max length is not based on anything,
                       -- find a more reasonable limit and display to user.
                     , maxlength 400

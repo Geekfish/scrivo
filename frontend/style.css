@@ -32,12 +32,15 @@ p {
     font-size: 1.5em;
 }
 
+.idented {
+    text-indent: 50px;
+}
+
 textarea {
     color: #fff;
     background-color: rgba(55, 55, 55, 0.25);
     font-size: 1.5em;
     min-height: 100px;
-    text-indent: 50px;
 }
 
 textarea::placeholder {
@@ -127,6 +130,12 @@ textarea::placeholder {
     background-color: rgba(55, 55, 55, 0.25);
     padding: 10px;
     border-radius: 6px;
+}
+
+.blur {
+    color:rgba(255,255,255, 0.008);
+    text-shadow: 0 0 20px rgba(255,255,255,0.9);
+    transition: text-shadow 0.5s ease;
 }
 
 .game-code {
