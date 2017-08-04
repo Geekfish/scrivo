@@ -356,7 +356,7 @@ update msg model =
         Types.HandleGameStart raw ->
             case Json.Decode.decodeValue gameDecoder raw of
                 Ok game ->
-                    { model | inProgress = game.inProgress } ! []
+                    { model | inProgress = game.inProgress, currentPlayer = game.currentPlayer } ! []
 
                 Err error ->
                     handleDecoderError error model

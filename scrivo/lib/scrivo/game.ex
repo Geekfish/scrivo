@@ -29,6 +29,7 @@ defmodule Scrivo.Game do
 
     def start(game) do
       current_player = game.players |> Map.keys |> Enum.random
+      Logger.debug "First Player: #{current_player}"
       %Scrivo.Game{
           game | in_progress: true,
                  current_player: current_player
