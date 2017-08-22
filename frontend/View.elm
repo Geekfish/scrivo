@@ -212,6 +212,42 @@ playerStatus currentRef player =
             ]
 
 
+isCurrentPlayer model =
+    case model.currentPlayer of
+        Just currentPlayerRef ->
+            currentPlayerRef == model.playerRef
+
+        _ ->
+            False
+
+
+currentPlayerInputOrProgress : Model -> Html Msg
+currentPlayerInputOrProgress model =
+    if isCurrentPlayer model then
+        div
+            [ class "col-md-6 col-md-offset-3" ]
+            [ textarea
+                [ placeholder "Once upon a time..."
+                , class "idented"
+                  -- TODO: This max length is not based on anything,
+                  -- find a more reasonable limit and display to user.
+                , maxlength 400
+                , onInput Types.UpdateInputText
+                ]
+                []
+            , button
+                [ class "btn btn-lg btn-success btn-group-justified"
+                , type_ "submit"
+                , disabled <| isEmpty model.textInput
+                ]
+                [ text "This really happened" ]
+            ]
+    else
+        div
+            [ class "col-md-6 col-md-offset-3 round-colored-container" ]
+            [ p [ class "idented blur" ] [ text model.textInput ] ]
+
+
 gameInProgress : Model -> Html Msg
 gameInProgress model =
     -- TODO:
@@ -226,21 +262,7 @@ gameInProgress model =
                 [ class "col-md-2 col-md-offset-5" ]
                 -- TODO: input real random title
                 [ h2 [ class "text-center" ] [ text "Text title" ] ]
-            , div
-                [ class "col-md-6 col-md-offset-3 round-colored-container" ]
-                [ p [ class "idented blur" ] [ text model.textInput ] ]
-            , div
-                [ class "col-md-6 col-md-offset-3" ]
-                [ textarea
-                    [ placeholder "Once upon a time..."
-                    , class "idented"
-                      -- TODO: This max length is not based on anything,
-                      -- find a more reasonable limit and display to user.
-                    , maxlength 400
-                    , onInput Types.UpdateInputText
-                    ]
-                    []
-                ]
+            , currentPlayerInputOrProgress model
             ]
         ]
 
