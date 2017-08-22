@@ -240,6 +240,8 @@ currentPlayerInputOrProgress model =
                 , type_ "submit"
                 , disabled <| isEmpty model.textInput
                 ]
+                -- TODO: submit the thing
+                -- Post input to server and update view for other players.
                 [ text "This really happened" ]
             ]
     else
@@ -250,10 +252,6 @@ currentPlayerInputOrProgress model =
 
 gameInProgress : Model -> Html Msg
 gameInProgress model =
-    -- TODO:
-    -- Only display textarea to current player.
-    -- Keep track of current player / next players.
-    -- Post input to server and update view for other players.
     div
         [ class "container-fluid main-content" ]
         [ div

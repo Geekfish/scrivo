@@ -44,6 +44,11 @@ defmodule Scrivo.GameServer do
       GenServer.call(__MODULE__, {:start, game_code})
   end
 
+  def submit_text(game_code, ref, text_input) do
+      Logger.debug "Starting game"
+      GenServer.call(__MODULE__, {:submit_text, game_code, ref, text_input})
+  end
+
   ## GenServer
   defp fetch_game(game_code) do
       :ets.lookup(:games, game_code) |> hd |> Game.from_tuple
@@ -93,7 +98,14 @@ defmodule Scrivo.GameServer do
       store_game game
       {:reply, {:ok, game}, state}
   end
-
+  def handle_call({:submit_text, game_code, ref, text_input}, _from, state) do
+      Logger.debug "GenServer handling: submit text"
+      game =
+          game_code
+          |> fetch_game
+          |> Game.submit_story_segment(ref, text_input)
+      {:reply, {:ok, game}, state}
+  end
   def handle_info(_msg, state) do
       {:noreply, state}
   end
