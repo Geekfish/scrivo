@@ -37,6 +37,7 @@ initialModel =
     , gameCodeInput = ""
     , nameInput = ""
     , textInput = ""
+    , storySegments = []
     , playerRef = ""
     , players = Dict.empty
     , inProgress = False
@@ -71,6 +72,7 @@ gameDecoder =
         |> required "game_code" string
         |> required "in_progress" bool
         |> optional "current_player" (Json.Decode.map Just string) Nothing
+        |> optional "story" (list storySegmentDecoder) []
 
 
 playerDecoder : Decoder Player
@@ -78,6 +80,13 @@ playerDecoder =
     decode Types.Player
         |> required "ref" string
         |> optional "name" string ""
+
+
+storySegmentDecoder : Decoder Types.StorySegment
+storySegmentDecoder =
+    decode Types.StorySegment
+        |> required "ref" string
+        |> required "text" string
 
 
 gameAndPlayersDecoder : Decoder Types.GameAndPlayers
@@ -157,6 +166,7 @@ handleRouting model =
                             |> Phoenix.Socket.on "player:update" channelName Types.HandlePlayerUpdate
                             |> Phoenix.Socket.on "game:start" channelName Types.HandleGameStart
                             |> Phoenix.Socket.on "game:receive_input" channelName Types.HandleTextInputUpdate
+                            |> Phoenix.Socket.on "game:submit_segment" channelName Types.HandleSegmentSubmission
                         )
             in
                 ( { model | socket = socket, gameCode = gameCode }
@@ -229,6 +239,20 @@ update msg model =
             update
                 (Types.JoinGame model.gameCodeInput)
                 model
+
+        Types.SubmitStorySegment ->
+            let
+                push =
+                    getGameChannel model.gameCode
+                        |> Phoenix.Push.init "game:submit_segment"
+                        |> Phoenix.Push.withPayload (registerTextInputParams model.textInput)
+
+                ( socket, cmd ) =
+                    Phoenix.Socket.push push model.socket
+            in
+                ( { model | socket = socket }
+                , Cmd.map Types.PhoenixMsg cmd
+                )
 
         Types.SubmitName ->
             let
@@ -365,6 +389,19 @@ update msg model =
             case Json.Decode.decodeValue currentPlayerStateDecoder raw of
                 Ok currentPlayerState ->
                     { model | textInput = currentPlayerState.textInput } ! []
+
+                Err error ->
+                    handleDecoderError error model
+
+        Types.HandleSegmentSubmission raw ->
+            case Json.Decode.decodeValue gameDecoder raw of
+                Ok game ->
+                    { model
+                        | currentPlayer = game.currentPlayer
+                        , storySegments = game.storySegments
+                        , textInput = ""
+                    }
+                        ! []
 
                 Err error ->
                     handleDecoderError error model

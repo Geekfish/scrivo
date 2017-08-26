@@ -5,13 +5,23 @@ defmodule Scrivo.Game do
     @enforce_keys [:game_code, :players]
     defstruct [:game_code, :in_progress, :players, :current_player, :story]
 
+    defp serialize_segments(stories) do
+        stories
+            |> Enum.map(fn story -> [story.ref, story.text] end)
+    end
+
+    defp deserialize_segments(stories) do
+        stories
+            |> Enum.map(fn [ref, text] -> %{ref: ref, text: text} end)
+    end
+
     def as_tuple(game) do
         {
             game.game_code,
             game.in_progress,
             game.players,
             game.current_player,
-            game.story,
+            game.story |> serialize_segments
         }
     end
 
@@ -21,7 +31,7 @@ defmodule Scrivo.Game do
             in_progress: in_progress,
             players: players,
             current_player: current_player,
-            story: story,
+            story: story |> deserialize_segments
         }
     end
 
@@ -45,10 +55,25 @@ defmodule Scrivo.Game do
       put_in game.players[ref].name, name
     end
 
+    defp find_ref_with_minimum_occurence(items) do
+        # TODO: rewrite this, there must be a way to order a list
+        # by the value of a specific key?
+        items
+            |> Enum.reduce(
+                %{}, fn(ref, acc) -> Map.update(acc, ref, 1, &(&1 + 1)) end)
+            |> Enum.reduce(
+                {nil, nil},
+                fn {ref, freq}, {current_ref, current_min} ->
+                    if current_min == nil || (current_min && freq < current_min) do
+                        {ref, freq}
+                    else {current_ref, current_min} end
+                end)
+            |> elem(0)
+    end
 
     def get_next_player(game) do
         refs = game.players |> Map.keys
-        story_refs = game.story |> Enum.map(&hd/1)
+        story_refs = game.story |> Enum.map(&(Map.fetch! &1, :ref))
         not_played_yet = refs -- story_refs
 
         Logger.debug("Refs:")
@@ -62,22 +87,16 @@ defmodule Scrivo.Game do
             if length(not_played_yet) > 0 do
                 not_played_yet |> Enum.random
             else
-                story_refs
-                    |> Enum.reduce(
-                        %{}, fn(ref, acc) -> Map.update(acc, ref, 1, &(&1 + 1)) end)
-                    |> Enum.map(&Map.to_list/1)
-                    |> List.foldl(
-                        [], fn ref_freq, current_min -> if List.last(ref_freq) < List.last(current_min) do ref_freq else current_min end end
-                    )
-                    |> hd
+                story_refs |> find_ref_with_minimum_occurence
             end
+        Logger.debug("Next player:")
         Logger.debug(next_player)
         next_player
     end
 
     def submit_story_segment(game, player_ref, story_segment) do
       game = %Scrivo.Game{
-          game | story: game.story ++ [[player_ref, story_segment]]
+          game | story: game.story ++ [%{ref: player_ref, text: story_segment}]
       }
       %Scrivo.Game{
           game | current_player: get_next_player(game)

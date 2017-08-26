@@ -71,12 +71,12 @@ defmodule Scrivo.GameChannel do
     {:noreply, socket}
   end
 
-  def handle_in("game:submit_input", params, socket) do
+  def handle_in("game:submit_segment", params, socket) do
     "game:" <> game_code = socket.topic
     current_input = params["text_input"]
     {:ok, game} =
         GameServer.submit_text(game_code, socket.assigns.user_ref, current_input)
-    broadcast! socket, "game:submit_input", game
+    broadcast! socket, "game:submit_segment", game
     {:noreply, socket}
   end
 end

@@ -27,6 +27,7 @@ type alias Model =
     , gameCodeInput : String
     , nameInput : String
     , textInput : String
+    , storySegments : List StorySegment
     , playerRef : String
     , players : Players
     , inProgress : Bool
@@ -52,6 +53,13 @@ type alias Game =
     { gameCode : GameCode
     , inProgress : Bool
     , currentPlayer : Maybe String
+    , storySegments : List StorySegment
+    }
+
+
+type alias StorySegment =
+    { playerRef : String
+    , text : String
     }
 
 
@@ -97,6 +105,7 @@ type
       -- Form Submission
     | SubmitGameCode
     | SubmitName
+    | SubmitStorySegment
       --
       -- Input Handling
     | UpdateInputGameCode GameCode
@@ -116,3 +125,4 @@ type
     | HandleGameJoin Json.Encode.Value
     | HandleGameStart Json.Encode.Value
     | HandleTextInputUpdate Json.Encode.Value
+    | HandleSegmentSubmission Json.Encode.Value

@@ -226,23 +226,29 @@ currentPlayerInputOrProgress model =
     if isCurrentPlayer model then
         div
             [ class "col-md-6 col-md-offset-3" ]
-            [ textarea
-                [ placeholder "Once upon a time..."
-                , class "idented"
-                  -- TODO: This max length is not based on anything,
-                  -- find a more reasonable limit and display to user.
-                , maxlength 400
-                , onInput Types.UpdateInputText
+            [ form
+                [ class "form round-container"
+                , onSubmit Types.SubmitStorySegment
+                , action "javascript:void(0);"
                 ]
-                []
-            , button
-                [ class "btn btn-lg btn-success btn-group-justified"
-                , type_ "submit"
-                , disabled <| isEmpty model.textInput
+                [ textarea
+                    [ placeholder "Once upon a time..."
+                    , class "idented"
+                      -- TODO: This max length is not based on anything,
+                      -- find a more reasonable limit and display to user.
+                    , maxlength 400
+                    , onInput Types.UpdateInputText
+                    ]
+                    []
+                , button
+                    [ class "btn btn-lg btn-success btn-group-justified"
+                    , type_ "submit"
+                    , disabled <| isEmpty model.textInput
+                    ]
+                    -- TODO: submit the thing
+                    -- Post input to server and update view for other players.
+                    [ text "This really happened" ]
                 ]
-                -- TODO: submit the thing
-                -- Post input to server and update view for other players.
-                [ text "This really happened" ]
             ]
     else
         div

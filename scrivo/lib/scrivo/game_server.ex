@@ -104,6 +104,7 @@ defmodule Scrivo.GameServer do
           game_code
           |> fetch_game
           |> Game.submit_story_segment(ref, text_input)
+      store_game game
       {:reply, {:ok, game}, state}
   end
   def handle_info(_msg, state) do
