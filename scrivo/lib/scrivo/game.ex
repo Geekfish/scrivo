@@ -55,20 +55,20 @@ defmodule Scrivo.Game do
       put_in game.players[ref].name, name
     end
 
-    defp find_ref_with_minimum_occurence(items) do
+    defp find_item_with_minimum_occurence(items) do
         # TODO: rewrite this, there must be a way to order a list
         # by the value of a specific key?
         items
             |> Enum.reduce(
                 %{}, fn(ref, acc) -> Map.update(acc, ref, 1, &(&1 + 1)) end)
+            |> Enum.map(&Tuple.to_list/1)
             |> Enum.reduce(
-                {nil, nil},
-                fn {ref, freq}, {current_ref, current_min} ->
-                    if current_min == nil || (current_min && freq < current_min) do
-                        {ref, freq}
-                    else {current_ref, current_min} end
+                fn counter, min_counter ->
+                    if  tl(counter) < tl(min_counter) do
+                        counter
+                    else min_counter end
                 end)
-            |> elem(0)
+            |> hd
     end
 
     def get_next_player(game) do
@@ -87,7 +87,7 @@ defmodule Scrivo.Game do
             if length(not_played_yet) > 0 do
                 not_played_yet |> Enum.random
             else
-                story_refs |> find_ref_with_minimum_occurence
+                story_refs |> find_item_with_minimum_occurence
             end
         Logger.debug("Next player:")
         Logger.debug(next_player)
