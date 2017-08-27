@@ -31,6 +31,7 @@ import Types
         , Route
         , Player
         , Model
+        , StorySegment
         )
 
 
@@ -245,8 +246,6 @@ currentPlayerInputOrProgress model =
                     , type_ "submit"
                     , disabled <| isEmpty model.textInput
                     ]
-                    -- TODO: submit the thing
-                    -- Post input to server and update view for other players.
                     [ text "This really happened" ]
                 ]
             ]
@@ -256,18 +255,27 @@ currentPlayerInputOrProgress model =
             [ p [ class "idented blur" ] [ text model.textInput ] ]
 
 
+renderSegment : StorySegment -> Html Msg
+renderSegment storySegment =
+    div
+        [ class "col-md-6 col-md-offset-3 round-colored-container" ]
+        [ p [ class "idented blur" ] [ text storySegment.text ] ]
+
+
 gameInProgress : Model -> Html Msg
 gameInProgress model =
     div
         [ class "container-fluid main-content" ]
         [ div
             [ class "row flex-row" ]
-            [ div
+            ([ div
                 [ class "col-md-2 col-md-offset-5" ]
                 -- TODO: input real random title
                 [ h2 [ class "text-center" ] [ text "Text title" ] ]
-            , currentPlayerInputOrProgress model
-            ]
+             ]
+                ++ (List.map renderSegment model.storySegments)
+                ++ [ currentPlayerInputOrProgress model ]
+            )
         ]
 
 
