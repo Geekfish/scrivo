@@ -213,6 +213,7 @@ playerStatus currentRef player =
             ]
 
 
+isCurrentPlayer : Model -> Bool
 isCurrentPlayer model =
     case model.currentPlayer of
         Just currentPlayerRef ->
@@ -255,11 +256,31 @@ currentPlayerInputOrProgress model =
             [ p [ class "idented blur" ] [ text model.textInput ] ]
 
 
+renderWords : List String -> List Int -> List (Html Msg)
+renderWords words visibleWords =
+    let
+        render index word =
+            if (List.member (index + 1) visibleWords) then
+                span [] [ text word ]
+            else
+                span [ class "blur" ] [ text word ]
+    in
+        List.indexedMap render words
+
+
 renderSegment : StorySegment -> Html Msg
 renderSegment storySegment =
-    div
-        [ class "col-md-6 col-md-offset-3 round-colored-container" ]
-        [ p [ class "idented blur" ] [ text storySegment.text ] ]
+    -- TODO: If it's your segment, show all of it
+    let
+        words =
+            String.split " " storySegment.text
+    in
+        div
+            [ class "col-md-6 col-md-offset-3 round-colored-container" ]
+            [ p
+                [ class "idented" ]
+                (renderWords words storySegment.visibleWords)
+            ]
 
 
 gameInProgress : Model -> Html Msg
@@ -271,7 +292,7 @@ gameInProgress model =
             ([ div
                 [ class "col-md-2 col-md-offset-5" ]
                 -- TODO: input real random title
-                [ h2 [ class "text-center" ] [ text "Text title" ] ]
+                [ h2 [ class "text-center" ] [ text model.title ] ]
              ]
                 ++ (List.map renderSegment model.storySegments)
                 ++ [ currentPlayerInputOrProgress model ]

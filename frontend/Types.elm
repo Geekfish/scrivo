@@ -28,6 +28,7 @@ type alias Model =
     , nameInput : String
     , textInput : String
     , storySegments : List StorySegment
+    , title : String
     , playerRef : String
     , players : Players
     , inProgress : Bool
@@ -54,12 +55,14 @@ type alias Game =
     , inProgress : Bool
     , currentPlayer : Maybe String
     , storySegments : List StorySegment
+    , title : String
     }
 
 
 type alias StorySegment =
     { playerRef : String
     , text : String
+    , visibleWords : List Int
     }
 
 

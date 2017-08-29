@@ -1,18 +1,25 @@
 defmodule Scrivo.Game do
+    alias Scrivo.TextUtils
     require Logger
 
     @derive [Poison.Encoder]
     @enforce_keys [:game_code, :players]
-    defstruct [:game_code, :in_progress, :players, :current_player, :story]
+    defstruct [:game_code, :in_progress, :players, :current_player, :story, :title]
 
     defp serialize_segments(stories) do
         stories
-            |> Enum.map(fn story -> [story.ref, story.text] end)
+            |> Enum.map(
+                fn story ->
+                    [story.ref, story.text, story.visible_words]
+                end)
     end
 
     defp deserialize_segments(stories) do
         stories
-            |> Enum.map(fn [ref, text] -> %{ref: ref, text: text} end)
+            |> Enum.map(
+                fn [ref, text, visible_words] ->
+                    %{ref: ref, text: text, visible_words: visible_words}
+                end)
     end
 
     def as_tuple(game) do
@@ -21,17 +28,19 @@ defmodule Scrivo.Game do
             game.in_progress,
             game.players,
             game.current_player,
-            game.story |> serialize_segments
+            game.title,
+            game.story |> serialize_segments,
         }
     end
 
-    def from_tuple({game_code, in_progress, players, current_player, story}) do
+    def from_tuple({game_code, in_progress, players, current_player, title, story}) do
         %Scrivo.Game{
             game_code: game_code,
             in_progress: in_progress,
             players: players,
             current_player: current_player,
-            story: story |> deserialize_segments
+            title: title,
+            story: story |> deserialize_segments,
         }
     end
 
@@ -41,6 +50,7 @@ defmodule Scrivo.Game do
             in_progress: false,
             players: %{},
             current_player: nil,
+            title: "",
             story: [],
         }
     end
@@ -94,9 +104,33 @@ defmodule Scrivo.Game do
         next_player
     end
 
+    defp generate_title do
+        # TODO: Get a better title generator
+        titles = [
+            "The Devil Chicken",
+            "Bees",
+            "This is Fine",
+            "Idiot Sandwich",
+        ]
+        Enum.random(titles)
+    end
+
+    defp get_visible_words(story_segment) do
+        word_count = TextUtils.word_count(story_segment)
+        visible_words = round(Float.floor(word_count * 0.2))
+        Enum.to_list(1..word_count)
+            |> Enum.take_random(visible_words)
+    end
+
     def submit_story_segment(game, player_ref, story_segment) do
       game = %Scrivo.Game{
-          game | story: game.story ++ [%{ref: player_ref, text: story_segment}]
+          game | story: game.story ++ [
+              %{
+                  ref: player_ref,
+                  text: story_segment,
+                  visible_words: get_visible_words(story_segment),
+              }
+          ]
       }
       %Scrivo.Game{
           game | current_player: get_next_player(game)
@@ -104,11 +138,12 @@ defmodule Scrivo.Game do
     end
 
     def start(game) do
-      current_player = game.players |> Map.keys |> Enum.random
+      current_player = get_next_player(game)
       Logger.debug "First Player: #{current_player}"
       %Scrivo.Game{
           game | in_progress: true,
-                 current_player: current_player
+                 current_player: current_player,
+                 title: generate_title(),
       }
     end
 end

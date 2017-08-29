@@ -38,6 +38,7 @@ initialModel =
     , nameInput = ""
     , textInput = ""
     , storySegments = []
+    , title = ""
     , playerRef = ""
     , players = Dict.empty
     , inProgress = False
@@ -73,6 +74,7 @@ gameDecoder =
         |> required "in_progress" bool
         |> optional "current_player" (Json.Decode.map Just string) Nothing
         |> optional "story" (list storySegmentDecoder) []
+        |> required "title" string
 
 
 playerDecoder : Decoder Player
@@ -87,6 +89,7 @@ storySegmentDecoder =
     decode Types.StorySegment
         |> required "ref" string
         |> required "text" string
+        |> required "visible_words" (list Json.Decode.int)
 
 
 gameAndPlayersDecoder : Decoder Types.GameAndPlayers
@@ -188,6 +191,16 @@ handleDecoderError error model =
             Debug.log "Error" error
     in
         model ! []
+
+
+updatedModelFromGame : Model -> Game -> Model
+updatedModelFromGame model game =
+    { model
+        | inProgress = game.inProgress
+        , currentPlayer = game.currentPlayer
+        , title = game.title
+        , storySegments = game.storySegments
+    }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -380,7 +393,7 @@ update msg model =
         Types.HandleGameStart raw ->
             case Json.Decode.decodeValue gameDecoder raw of
                 Ok game ->
-                    { model | inProgress = game.inProgress, currentPlayer = game.currentPlayer } ! []
+                    (updatedModelFromGame model game) ! []
 
                 Err error ->
                     handleDecoderError error model
@@ -396,12 +409,11 @@ update msg model =
         Types.HandleSegmentSubmission raw ->
             case Json.Decode.decodeValue gameDecoder raw of
                 Ok game ->
-                    { model
-                        | currentPlayer = game.currentPlayer
-                        , storySegments = game.storySegments
-                        , textInput = ""
-                    }
-                        ! []
+                    let
+                        updatedModel =
+                            (updatedModelFromGame model game)
+                    in
+                        { updatedModel | textInput = "" } ! []
 
                 Err error ->
                     handleDecoderError error model

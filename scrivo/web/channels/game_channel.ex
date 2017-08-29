@@ -2,7 +2,7 @@ defmodule Scrivo.GameChannel do
   use Scrivo.Web, :channel
   alias Scrivo.Presence
   alias Scrivo.GameServer
-  alias Scrivo.GameCodeGenerator
+  alias Scrivo.TextUtils
   alias Scrivo.Player
   require Logger
 
@@ -40,7 +40,7 @@ defmodule Scrivo.GameChannel do
 
 
   def handle_in("game:new", _params, socket) do
-    new_game_code = GameCodeGenerator.code_of_length(8)
+    new_game_code = TextUtils.code_of_length(8)
     {:ok, game} = GameServer.create(new_game_code)
     {:reply, {:ok, game}, socket}
   end
